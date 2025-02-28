@@ -92,7 +92,7 @@ $ 도움말         // 명령어 안내
 
 ## 📱 스크린샷
 
-![스크린샷](https://via.placeholder.com/800x400.png?text=Screenshots)
+![스크린샷](image/screenshot.png)
 
 ## 🔮 향후 개발 계획
 
