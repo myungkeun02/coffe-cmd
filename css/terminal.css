@@ -1,0 +1,405 @@
+/* terminal.css - 터미널 관련 스타일 */
+
+/* 터미널 화면 공통 */
+.terminal-screen {
+    padding: 10px;
+    overflow-y: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    color: #0f0;
+    background-color: #000;
+}
+
+/* 메시지 스타일 */
+.message {
+    margin-bottom: 10px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.user-message {
+    color: #0f0;
+}
+
+.system-message {
+    color: #999;
+    font-style: italic;
+}
+
+.bot-message {
+    color: #0ff;
+}
+
+.friend-message {
+    color: #f0f;
+}
+
+.error-message {
+    color: #f00;
+}
+
+.success-message {
+    color: #0f0;
+}
+
+.typing-indicator::after {
+    content: '▋';
+    animation: blink 1s infinite;
+}
+
+/* 아스키 아트 */
+.ascii-image {
+    font-size: 10px;
+    line-height: 10px;
+    white-space: pre;
+    margin-bottom: 15px;
+}
+
+/* 카드 */
+.card {
+    border: 1px solid #0f0;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 3px;
+}
+
+.card-title {
+    color: #0f0;
+    margin-bottom: 5px;
+    border-bottom: 1px dashed #0f0;
+    padding-bottom: 3px;
+    font-weight: bold;
+}
+
+/* 입력 라인 */
+.input-line {
+    display: flex;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px dashed #0f0;
+}
+
+.prompt {
+    color: #0f0;
+    margin-right: 8px;
+    white-space: nowrap;
+}
+
+.command-input {
+    background-color: transparent;
+    border: none;
+    color: #0f0;
+    font-family: 'D2Coding', 'Consolas', monospace;
+    font-size: 16px;
+    flex: 1;
+    outline: none;
+}
+
+.command-button {
+    background-color: transparent;
+    border: 1px solid #0f0;
+    color: #0f0;
+    padding: 2px 5px;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.command-button:hover {
+    background-color: #003300;
+}
+
+/* 테이블 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+th, td {
+    border: 1px solid #0f0;
+    padding: 5px;
+    text-align: left;
+}
+
+th {
+    background-color: #030;
+}
+
+/* 매칭 아이템 */
+.match-item {
+    padding: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #333;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.match-item:hover {
+    background-color: #031;
+    border-color: #0f0;
+}
+
+.match-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3px;
+}
+
+.match-name {
+    color: yellow;
+}
+
+.match-job {
+    color: cyan;
+}
+
+.match-interests {
+    margin-bottom: 3px;
+}
+
+.match-location {
+    margin-bottom: 3px;
+}
+
+.match-rating {
+    color: #0f0;
+}
+
+/* 프로필 */
+.profile-section {
+    border-bottom: 1px dashed #0f0;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.profile-section h3 {
+    color: #0f0;
+    margin-bottom: 5px;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-item {
+    margin: 3px 0;
+    display: flex;
+}
+
+.profile-label {
+    width: 100px;
+    color: #999;
+}
+
+.profile-value {
+    flex: 1;
+}
+
+.profile-edit {
+    color: #0ff;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.profile-edit:hover {
+    text-decoration: underline;
+}
+
+/* 진행 바 */
+.progress-bar {
+    width: 100%;
+    height: 15px;
+    background-color: #111;
+    border: 1px solid #0f0;
+    margin-top: 5px;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #0f0;
+}
+
+/* 채팅 화면 */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #0f0;
+}
+
+.chat-user-info {
+    display: flex;
+    align-items: center;
+}
+
+.chat-avatar {
+    width: 30px;
+    height: 30px;
+    background-color: #0f0;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: bold;
+}
+
+.chat-tools {
+    display: flex;
+}
+
+.chat-tool-button {
+    background-color: transparent;
+    border: 1px solid #0f0;
+    color: #0f0;
+    padding: 2px 5px;
+    cursor: pointer;
+    margin-left: 5px;
+    font-size: 12px;
+}
+
+.chat-tool-button:hover {
+    background-color: #030;
+}
+
+/* 이모티콘 패널 */
+.emoticon-panel {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    margin-bottom: 10px;
+    padding: 5px;
+    border: 1px solid #0f0;
+}
+
+.emoticon-item {
+    padding: 5px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.emoticon-item:hover {
+    background-color: #030;
+}
+
+/* 커뮤니티 */
+.post-item {
+    padding: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #333;
+    cursor: pointer;
+}
+
+.post-item:hover {
+    background-color: #031;
+    border-color: #0f0;
+}
+
+.post-title {
+    margin-bottom: 3px;
+}
+
+.post-category {
+    color: cyan;
+    font-weight: bold;
+}
+
+.post-info {
+    display: flex;
+    justify-content: space-between;
+    color: #999;
+    font-size: 12px;
+}
+
+/* 폼 컨트롤 */
+.form-group {
+    margin-bottom: 10px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #0f0;
+}
+
+.form-input {
+    width: 100%;
+    background-color: #111;
+    border: 1px solid #0f0;
+    padding: 5px;
+    color: #0f0;
+    font-family: 'D2Coding', 'Consolas', monospace;
+}
+
+.form-textarea {
+    width: 100%;
+    background-color: #111;
+    border: 1px solid #0f0;
+    padding: 5px;
+    color: #0f0;
+    font-family: 'D2Coding', 'Consolas', monospace;
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-select {
+    width: 100%;
+    background-color: #111;
+    border: 1px solid #0f0;
+    padding: 5px;
+    color: #0f0;
+    font-family: 'D2Coding', 'Consolas', monospace;
+}
+
+.form-button {
+    background-color: #0f0;
+    color: #000;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: 'D2Coding', 'Consolas', monospace;
+}
+
+.form-button:hover {
+    background-color: #00cc00;
+}
+
+.form-button.secondary {
+    background-color: transparent;
+    color: #0f0;
+    border: 1px solid #0f0;
+}
+
+.form-button.secondary:hover {
+    background-color: #003300;
+}
+
+/* 로딩 인디케이터 */
+.loading {
+    display: inline-block;
+}
+
+.loading:after {
+    content: '.';
+    animation: dots 1.5s steps(5, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60% { content: '...'; }
+    80%, 100% { content: ''; }
+}

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈 - 커피CMD</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/terminal.css">
+    <style>
+        /* 홈 페이지 전용 스타일 */
+        .welcome-banner {
+            margin-bottom: 20px;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .quick-stats {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #0f0;
+            border-radius: 3px;
+            margin: 0 5px;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0f0;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-screen">
+        <div class="welcome-banner">
+            <div class="message system-message">커피CMD에 오신 것을 환영합니다!</div>
+            <div class="message system-message">현재 버전: v1.1 (2025-02-28)</div>
+            <div class="ascii-image">
+   _____       __  __            _____ __  __ _____  
+  / ____|     / _|/ _|          / ____|  \/  |  __ \ 
+ | |     ___ | |_| |_ ___  ___ | |    | \  / | |  | |
+ | |    / _ \|  _|  _/ _ \/ _ \| |    | |\/| | |  | |
+ | |___| (_) | | | ||  __/  __/| |____| |  | | |__| |
+  \_____\___/|_| |_| \___|\___|\_____/_|__|_|_____/ 
+                                                     
+            </div>
+        </div>
+        
+        <div class="quick-stats">
+            <div class="stat-item">
+                <div class="stat-value" id="matchCount">8</div>
+                <div class="stat-label">매칭</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="messageCount">12</div>
+                <div class="stat-label">메시지</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="meetingCount">3</div>
+                <div class="stat-label">약속</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="recommendationCount">5</div>
+                <div class="stat-label">추천</div>
+            </div>
+        </div>
+        
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-title">알림</div>
+                <div id="notifications-list">
+                    <div class="message">- 새로운 매칭 요청이 3건 있습니다.</div>
+                    <div class="message">- 미확인 메시지가 2건 있습니다.</div>
+                    <div class="message">- 추천 멘토 업데이트가 있습니다.</div>
+                    <div class="message">- 다음 레벨까지 경험치 <span id="remainingExp">160</span>점 남았습니다.</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">최근 활동</div>
+                <div id="recent-activities">
+                    <div class="message">- 김개발님과의 대화 (1시간 전)</div>
+                    <div class="message">- 프로그래밍 커뮤니티 글 조회 (3시간 전)</div>
+                    <div class="message">- 박디자이너님과 일정 확정 (어제)</div>
+                    <div class="message">- 스타벅스 강남점 카페 정보 확인 (2일 전)</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">추천 키워드</div>
+                <div id="recommended-keywords">
+                    <span class="badge">React</span>
+                    <span class="badge">UX/UI</span>
+                    <span class="badge">스타트업</span>
+                    <span class="badge">프리랜서</span>
+                    <span class="badge">AI</span>
+                    <span class="badge">웹개발</span>
+                    <span class="badge">백엔드</span>
+                    <span class="badge">커리어</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">레벨 진행도</div>
+                <div class="profile-info">
+                    <div class="profile-item">
+                        <div class="profile-label">현재 레벨:</div>
+                        <div class="profile-value" id="currentLevel">Lv.3</div>
+                    </div>
+                    <div class="profile-item">
+                        <div class="profile-label">경험치:</div>
+                        <div class="profile-value" id="expProgress">340/500</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="expBar" style="width: 68%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">추천 매칭</div>
+            <div id="recommended-matches">
+                <div class="match-item" data-id="user1">
+                    <div class="match-info">
+                        <span class="match-name">박디자이너</span>
+                        <span class="match-job">UX/UI 디자이너</span>
+                    </div>
+                    <div class="match-interests">관심사: 웹디자인, 사용자경험, 미니멀리즘, 커피</div>
+                    <div class="match-location">지역: 서울 강남구</div>
+                    <div class="match-rating">⭐ 일치도: 89%</div>
+                </div>
+                <div class="match-item" data-id="user2">
+                    <div class="match-info">
+                        <span class="match-name">김개발</span>
+                        <span class="match-job">프론트엔드 개발자</span>
+                    </div>
+                    <div class="match-interests">관심사: React, 디자인시스템, 오픈소스, 맥주</div>
+                    <div class="match-location">지역: 서울 송파구</div>
+                    <div class="match-rating">⭐ 일치도: 75%</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-line">
+            <span class="prompt">커피CMD></span>
+            <input type="text" class="command-input" id="commandInput" placeholder="명령어를 입력하세요 (도움말: 'help' 입력)">
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const commandInput = document.getElementById('commandInput');
+            
+            // 부모 창에 사용자 데이터 요청
+            window.parent.postMessage({ action: 'getUser' }, '*');
+            
+            // 부모 창으로부터 메시지 수신
+            window.addEventListener('message', function(event) {
+                const message = event.data;
+                
+                if (message.action === 'userData') {
+                    updateUserData(message.userData);
+                }
+            });
+            
+            // 명령어 입력 처리
+            commandInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    processCommand(this.value);
+                    this.value = '';
+                }
+            });
+            
+            // 매칭 항목 클릭 처리
+            document.querySelectorAll('.match-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: `${this.querySelector('.match-name').textContent}님과의 채팅을 시작합니다.`,
+                        type: 'info'
+                    }, '*');
+                    
+                    // 채팅 페이지로 이동
+                    window.parent.postMessage({
+                        action: 'navigate',
+                        screen: 'chat'
+                    }, '*');
+                });
+            });
+            
+            // 사용자 데이터 업데이트
+            function updateUserData(userData) {
+                document.getElementById('currentLevel').textContent = `Lv.${userData.level}`;
+                document.getElementById('expProgress').textContent = `${userData.exp}/${userData.expMax}`;
+                document.getElementById('expBar').style.width = `${(userData.exp / userData.expMax) * 100}%`;
+                document.getElementById('remainingExp').textContent = userData.expMax - userData.exp;
+                
+                // 키워드 업데이트
+                if (userData.interests && userData.interests.length > 0) {
+                    const keywordsContainer = document.getElementById('recommended-keywords');
+                    keywordsContainer.innerHTML = '';
+                    
+                    // 사용자 관심사 추가
+                    userData.interests.forEach(interest => {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge';
+                        badge.textContent = interest;
+                        keywordsContainer.appendChild(badge);
+                    });
+                    
+                    // 추가 키워드
+                    const additionalKeywords = ['스타트업', '프리랜서', 'AI', '웹개발', '백엔드', '커리어'];
+                    additionalKeywords.forEach(keyword => {
+                        if (!userData.interests.includes(keyword)) {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge';
+                            badge.textContent = keyword;
+                            keywordsContainer.appendChild(badge);
+                        }
+                    });
+                }
+            }
+            
+            // 명령어 처리
+            function processCommand(command) {
+                if (!command.trim()) return;
+                
+                const commandLower = command.toLowerCase().trim();
+                
+                if (commandLower === 'help' || commandLower === '도움말') {
+                    window.parent.postMessage({
+                        action: 'navigate',
+                        screen: 'help'
+                    }, '*');
+                } else if (commandLower === 'refresh' || commandLower === '새로고침') {
+                    location.reload();
+                } else if (commandLower.startsWith('profile') || commandLower.startsWith('프로필')) {
+                    window.parent.postMessage({
+                        action: 'navigate',
+                        screen: 'profile'
+                    }, '*');
+                } else if (commandLower.startsWith('match') || commandLower.startsWith('매칭')) {
+                    window.parent.postMessage({
+                        action: 'navigate',
+                        screen: 'matches'
+                    }, '*');
+                } else if (commandLower.startsWith('chat') || commandLower.startsWith('채팅')) {
+                    window.parent.postMessage({
+                        action: 'navigate',
+                        screen: 'chat'
+                    }, '*');
+                } else {
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: `'${command}' 명령어를 찾을 수 없습니다. 'help'를 입력하여 도움말을 확인하세요.`,
+                        type: 'error'
+                    }, '*');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

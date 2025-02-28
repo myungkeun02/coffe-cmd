@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>커피CMD - 한국형 커피챗 앱</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/terminal.css">
+</head>
+<body>
+    <div class="terminal-header">
+        <div class="app-title">
+            <div>커피CMD v1.1 - 한국형 커피챗 앱</div>
+        </div>
+        <div class="window-controls">
+            <div class="control minimize"></div>
+            <div class="control maximize"></div>
+            <div class="control close"></div>
+        </div>
+    </div>
+    
+    <div class="menu-bar">
+        <div class="menu-item active" data-screen="home">홈</div>
+        <div class="menu-item" data-screen="matches">매칭</div>
+        <div class="menu-item" data-screen="chat">채팅</div>
+        <div class="menu-item" data-screen="profile">프로필</div>
+        <div class="menu-item" data-screen="community">커뮤니티</div>
+        <div class="menu-item" data-screen="cafes">카페정보</div>
+        <div class="menu-item" data-screen="help">도움말</div>
+    </div>
+    
+    <div class="main-content">
+        <div class="terminal" id="mainTerminal">
+            <iframe id="contentFrame" src="pages/home.html" frameborder="0"></iframe>
+        </div>
+    </div>
+    
+    <div class="status-bar">
+        <div class="status-left" id="userStatus">사용자: 게스트 | 레벨: Lv.3 | 활동점수: 127</div>
+        <div class="status-right">미확인 알림: <span id="notificationCount">3</span> | 접속자: <span id="onlineUsers">1,245</span>명 | v1.1</div>
+    </div>
+
+    <div id="notification-area"></div>
+    <div id="modal-container" class="hidden"></div>
+    
+    <script src="js/main.js"></script>
+</body>
+</html>

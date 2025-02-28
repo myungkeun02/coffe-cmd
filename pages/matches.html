@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매칭 - 커피CMD</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/terminal.css">
+    <style>
+        /* 매칭 페이지 전용 스타일 */
+        .matches-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .match-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #0f0;
+            border-radius: 3px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .filter-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 3px;
+        }
+        
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .match-action-btn {
+            background-color: transparent;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 2px 6px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        .match-action-btn:hover {
+            background-color: #003300;
+        }
+        
+        .match-action-btn.accept {
+            background-color: #006600;
+        }
+        
+        .match-action-btn.reject {
+            color: #ff6666;
+            border-color: #ff6666;
+        }
+        
+        .match-action-btn.reject:hover {
+            background-color: #330000;
+        }
+        
+        .match-status {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 12px;
+            border-radius: 3px;
+            margin-top: 5px;
+        }
+        
+        .match-status.pending {
+            background-color: #333;
+            color: #ff9900;
+            border: 1px solid #ff9900;
+        }
+        
+        .match-status.accepted {
+            background-color: #060;
+            color: #fff;
+        }
+        
+        .match-status.scheduled {
+            background-color: #006699;
+            color: #fff;
+        }
+        
+        .match-status.completed {
+            background-color: #339933;
+            color: #fff;
+        }
+        
+        .match-status.rejected {
+            background-color: #330000;
+            color: #ff6666;
+        }
+        
+        .badge.selected {
+            background-color: #006600;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-screen">
+        <div class="message system-message">매칭 관리 화면입니다. 관심사나 직업을 기반으로 매칭된 사용자 목록입니다.</div>
+        
+        <div class="filter-bar">
+            <div class="filter-group">
+                <div class="filter-label">직업군</div>
+                <div class="filter-options">
+                    <span class="badge selected" data-filter="job" data-value="all">전체</span>
+                    <span class="badge" data-filter="job" data-value="개발자">개발자</span>
+                    <span class="badge" data-filter="job" data-value="디자이너">디자이너</span>
+                    <span class="badge" data-filter="job" data-value="마케터">마케터</span>
+                    <span class="badge" data-filter="job" data-value="기획자">기획자</span>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <div class="filter-label">지역</div>
+                <div class="filter-options">
+                    <span class="badge selected" data-filter="location" data-value="all">전체</span>
+                    <span class="badge" data-filter="location" data-value="강남">강남</span>
+                    <span class="badge" data-filter="location" data-value="판교">판교</span>
+                    <span class="badge" data-filter="location" data-value="홍대">홍대</span>
+                    <span class="badge" data-filter="location" data-value="성수">성수</span>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <div class="filter-label">상태</div>
+                <div class="filter-options">
+                    <span class="badge selected" data-filter="status" data-value="all">전체</span>
+                    <span class="badge" data-filter="status" data-value="pending">대기중</span>
+                    <span class="badge" data-filter="status" data-value="accepted">수락됨</span>
+                    <span class="badge" data-filter="status" data-value="scheduled">예정됨</span>
+                    <span class="badge" data-filter="status" data-value="completed">완료됨</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">새로운 매칭</div>
+            <div class="matches-container" id="new-matches">
+                <div class="match-item" data-id="user1" data-job="디자이너" data-location="강남" data-status="pending">
+                    <div class="match-info">
+                        <span class="match-name">박디자이너</span>
+                        <span class="match-job">UX/UI 디자이너</span>
+                    </div>
+                    <div class="match-interests">관심사: 웹디자인, 사용자경험, 미니멀리즘, 커피</div>
+                    <div class="match-location">지역: 서울 강남구</div>
+                    <div class="match-rating">⭐ 일치도: 89%</div>
+                    <div class="match-status pending">대기중</div>
+                    <div class="match-actions">
+                        <button class="match-action-btn accept" data-action="accept" data-id="user1">수락</button>
+                        <button class="match-action-btn reject" data-action="reject" data-id="user1">거절</button>
+                        <button class="match-action-btn" data-action="chat" data-id="user1">메시지</button>
+                    </div>
+                </div>
+                
+                <div class="match-item" data-id="user2" data-job="개발자" data-location="송파" data-status="pending">
+                    <div class="match-info">
+                        <span class="match-name">김개발</span>
+                        <span class="match-job">프론트엔드 개발자</span>
+                    </div>
+                    <div class="match-interests">관심사: React, 디자인시스템, 오픈소스, 맥주</div>
+                    <div class="match-location">지역: 서울 송파구</div>
+                    <div class="match-rating">⭐ 일치도: 75%</div>
+                    <div class="match-status pending">대기중</div>
+                    <div class="match-actions">
+                        <button class="match-action-btn accept" data-action="accept" data-id="user2">수락</button>
+                        <button class="match-action-btn reject" data-action="reject" data-id="user2">거절</button>
+                        <button class="match-action-btn" data-action="chat" data-id="user2">메시지</button>
+                    </div>
+                </div>
+                
+                <div class="match-item" data-id="user3" data-job="기획자" data-location="서초" data-status="pending">
+                    <div class="match-info">
+                        <span class="match-name">이창업</span>
+                        <span class="match-job">스타트업 대표</span>
+                    </div>
+                    <div class="match-interests">관심사: AI, 투자유치, 제품기획, 와인</div>
+                    <div class="match-location">지역: 서울 서초구</div>
+                    <div class="match-rating">⭐ 일치도: 65%</div>
+                    <div class="match-status pending">대기중</div>
+                    <div class="match-actions">
+                        <button class="match-action-btn accept" data-action="accept" data-id="user3">수락</button>
+                        <button class="match-action-btn reject" data-action="reject" data-id="user3">거절</button>
+                        <button class="match-action-btn" data-action="chat" data-id="user3">메시지</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">진행 중인 매칭</div>
+            <div class="matches-container" id="active-matches">
+                <div class="match-item" data-id="user4" data-job="마케터" data-location="마포" data-status="accepted">
+                    <div class="match-info">
+                        <span class="match-name">최마케터</span>
+                        <span class="match-job">디지털 마케터</span>
+                    </div>
+                    <div class="match-interests">관심사: SNS마케팅, 콘텐츠제작, 브랜딩, 다이어리</div>
+                    <div class="match-location">지역: 서울 마포구</div>
+                    <div class="match-status accepted">수락됨</div>
+                    <div class="match-actions">
+                        <button class="match-action-btn" data-action="schedule" data-id="user4">일정 잡기</button>
+                        <button class="match-action-btn" data-action="chat" data-id="user4">메시지</button>
+                    </div>
+                </div>
+                
+                <div class="match-item" data-id="user5" data-job="디자이너" data-location="성수" data-status="scheduled">
+                    <div class="match-info">
+                        <span class="match-name">정UX</span>
+                        <span class="match-job">UX 리서처</span>
+                    </div>
+                    <div class="match-interests">관심사: 사용자 리서치, 인터랙션 디자인, 심리학, 차</div>
+                    <div class="match-location">지역: 서울 성동구</div>
+                    <div class="match-status scheduled">📅 2025-03-05 16:00</div>
+                    <div class="match-actions">
+                        <button class="match-action-btn" data-action="reschedule" data-id="user5">일정 변경</button>
+                        <button class="match-action-btn" data-action="chat" data-id="user5">메시지</button>
+                        <button class="match-action-btn" data-action="complete" data-id="user5">완료</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">완료된 매칭</div>
+            <div class="matches-container" id="completed-matches">
+                <div class="match-item" data-id="user6" data-job="개발자" data-location="강남" data-status="completed">
+                    <div class="match-info">
+                        <span class="match-name">박풀스택</span>
+                        <span class="match-job">풀스택 개발자</span>
+                    </div>
+                    <div class="match-interests">관심사: Node.js, React, MongoDB, 클라우드</div>
+                    <div class="match-location">지역: 서울 강남구</div>
+                    <div class="match-status completed">✅ 2025-02-20 완료</div>
+                    <div class="match-actions">
+                        <button class="match-action-btn" data-action="review" data-id="user6">후기 작성</button>
+                        <button class="match-action-btn" data-action="chat" data-id="user6">메시지</button>
+                    </div>
+                </div>
+                
+                <div class="match-item" data-id="user7" data-job="기획자" data-location="판교" data-status="completed">
+                    <div class="match-info">
+                        <span class="match-name">김PM</span>
+                        <span class="match-job">제품 관리자</span>
+                    </div>
+                    <div class="match-interests">관심사: 애자일, 스크럼, 제품 전략, 맥주</div>
+                    <div class="match-location">지역: 경기 판교</div>
+                    <div class="match-status completed">✅ 2025-02-12 완료</div>
+                    <div class="match-actions">
+                        <button class="match-action-btn" data-action="review" data-id="user7">후기 작성</button>
+                        <button class="match-action-btn" data-action="chat" data-id="user7">메시지</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-line">
+            <span class="prompt">매칭></span>
+            <input type="text" class="command-input" id="commandInput" placeholder="'매치 [찾을 사람 키워드]' 명령어로 새 매칭을 찾으세요">
+            <button class="command-button" id="searchButton">검색</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const commandInput = document.getElementById('commandInput');
+            const searchButton = document.getElementById('searchButton');
+            
+            // 필터 이벤트 처리
+            setupFilters();
+            
+            // 매칭 액션 버튼 이벤트 처리
+            setupMatchActions();
+            
+            // 명령어 입력 처리
+            commandInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    processCommand(this.value);
+                    this.value = '';
+                }
+            });
+            
+            searchButton.addEventListener('click', function() {
+                processCommand(commandInput.value);
+                commandInput.value = '';
+            });
+            
+            // 필터 설정
+            function setupFilters() {
+                const filterBadges = document.querySelectorAll('.badge[data-filter]');
+                
+                filterBadges.forEach(badge => {
+                    badge.addEventListener('click', function() {
+                        const filterType = this.getAttribute('data-filter');
+                        const filterValue = this.getAttribute('data-value');
+                        
+                        // 같은 필터 그룹에서 선택된 뱃지 변경
+                        document.querySelectorAll(`.badge[data-filter="${filterType}"]`).forEach(b => {
+                            b.classList.remove('selected');
+                        });
+                        
+                        this.classList.add('selected');
+                        
+                        // 필터 적용
+                        applyFilters();
+                    });
+                });
+            }
+            
+            // 필터 적용
+            function applyFilters() {
+                const jobFilter = document.querySelector('.badge.selected[data-filter="job"]').getAttribute('data-value');
+                const locationFilter = document.querySelector('.badge.selected[data-filter="location"]').getAttribute('data-value');
+                const statusFilter = document.querySelector('.badge.selected[data-filter="status"]').getAttribute('data-value');
+                
+                const allMatches = document.querySelectorAll('.match-item');
+                
+                allMatches.forEach(match => {
+                    const matchJob = match.getAttribute('data-job');
+                    const matchLocation = match.getAttribute('data-location');
+                    const matchStatus = match.getAttribute('data-status');
+                    
+                    let visible = true;
+                    
+                    if (jobFilter !== 'all' && !matchJob.includes(jobFilter)) {
+                        visible = false;
+                    }
+                    
+                    if (locationFilter !== 'all' && !matchLocation.includes(locationFilter)) {
+                        visible = false;
+                    }
+                    
+                    if (statusFilter !== 'all' && matchStatus !== statusFilter) {
+                        visible = false;
+                    }
+                    
+                    match.style.display = visible ? 'block' : 'none';
+                });
+            }
+            
+            // 매칭 액션 버튼 설정
+            function setupMatchActions() {
+                const actionButtons = document.querySelectorAll('.match-action-btn');
+                
+                actionButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const action = this.getAttribute('data-action');
+                        const userId = this.getAttribute('data-id');
+                        const matchItem = document.querySelector(`.match-item[data-id="${userId}"]`);
+                        const userName = matchItem.querySelector('.match-name').textContent;
+                        
+                        switch (action) {
+                            case 'accept':
+                                acceptMatch(userId, userName, matchItem);
+                                break;
+                                
+                            case 'reject':
+                                rejectMatch(userId, userName, matchItem);
+                                break;
+                                
+                            case 'chat':
+                                openChat(userId, userName);
+                                break;
+                                
+                            case 'schedule':
+                                scheduleMatch(userId, userName, matchItem);
+                                break;
+                                
+                            case 'reschedule':
+                                rescheduleMatch(userId, userName);
+                                break;
+                                
+                            case 'complete':
+                                completeMatch(userId, userName, matchItem);
+                                break;
+                                
+                            case 'review':
+                                writeReview(userId, userName);
+                                break;
+                        }
+                    });
+                });
+            }
+            
+            // 매칭 수락
+            function acceptMatch(userId, userName, matchItem) {
+                window.parent.postMessage({
+                    action: 'notification',
+                    text: `${userName}님의 매칭 요청을 수락했습니다.`,
+                    type: 'success'
+                }, '*');
+                
+                // 상태 업데이트
+                matchItem.setAttribute('data-status', 'accepted');
+                const statusDiv = matchItem.querySelector('.match-status');
+                statusDiv.textContent = '수락됨';
+                statusDiv.className = 'match-status accepted';
+                
+                // 버튼 업데이트
+                matchItem.querySelector('.match-actions').innerHTML = `
+                    <button class="match-action-btn" data-action="schedule" data-id="${userId}">일정 잡기</button>
+                    <button class="match-action-btn" data-action="chat" data-id="${userId}">메시지</button>
+                `;
+                
+                // 목록 이동
+                document.getElementById('active-matches').appendChild(matchItem);
+                
+                // 버튼 이벤트 다시 설정
+                setupMatchActions();
+            }
+            
+            // 매칭 거절
+            function rejectMatch(userId, userName, matchItem) {
+                const confirmed = confirm(`${userName}님의 매칭 요청을 거절하시겠습니까?`);
+                
+                if (confirmed) {
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: `${userName}님의 매칭 요청을 거절했습니다.`,
+                        type: 'info'
+                    }, '*');
+                    
+                    matchItem.remove();
+                }
+            }
+            
+            // 채팅 열기
+            function openChat(userId, userName) {
+                window.parent.postMessage({
+                    action: 'notification',
+                    text: `${userName}님과의 채팅을 시작합니다.`,
+                    type: 'info'
+                }, '*');
+                
+                // 채팅 페이지로 이동
+                window.parent.postMessage({
+                    action: 'navigate',
+                    screen: 'chat'
+                }, '*');
+                
+                // 해당 사용자 데이터 전달 (세션 스토리지에 저장)
+                sessionStorage.setItem('currentChatUser', JSON.stringify({
+                    id: userId,
+                    name: userName
+                }));
+            }
+            
+            // 일정 잡기
+            function scheduleMatch(userId, userName, matchItem) {
+                const dateTimeContent = `
+                    <div class="form-group">
+                        <label class="form-label">날짜</label>
+                        <input type="date" class="form-input" id="scheduleDate" min="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">시간</label>
+                        <input type="time" class="form-input" id="scheduleTime">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">장소</label>
+                        <select class="form-select" id="scheduleLocation">
+                            <option value="스타벅스 강남점">스타벅스 강남점</option>
+                            <option value="카페 공명">카페 공명</option>
+                            <option value="카페 노마드">카페 노마드</option>
+                            <option value="블루보틀 성수점">블루보틀 성수점</option>
+                            <option value="직접 입력">직접 입력</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="customLocationGroup" style="display: none;">
+                        <label class="form-label">직접 입력</label>
+                        <input type="text" class="form-input" id="customLocation">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">메모</label>
+                        <textarea class="form-textarea" id="scheduleMemo" placeholder="메모 사항을 입력하세요."></textarea>
+                    </div>
+                `;
+                
+                window.parent.postMessage({
+                    action: 'openModal',
+                    title: `${userName}님과 일정 잡기`,
+                    content: dateTimeContent,
+                    buttons: [
+                        {
+                            text: '확인',
+                            action: function() {
+                                const date = document.getElementById('scheduleDate').value;
+                                const time = document.getElementById('scheduleTime').value;
+                                
+                                if (!date || !time) {
+                                    alert('날짜와 시간을 모두 입력해주세요.');
+                                    return false;
+                                }
+                                
+                                const locationSelect = document.getElementById('scheduleLocation');
+                                let location = locationSelect.value;
+                                
+                                if (location === '직접 입력') {
+                                    location = document.getElementById('customLocation').value;
+                                }
+                                
+                                const memo = document.getElementById('scheduleMemo').value;
+                                
+                                // 상태 업데이트
+                                matchItem.setAttribute('data-status', 'scheduled');
+                                const statusDiv = matchItem.querySelector('.match-status');
+                                statusDiv.textContent = `📅 ${date} ${time}`;
+                                statusDiv.className = 'match-status scheduled';
+                                
+                                // 버튼 업데이트
+                                matchItem.querySelector('.match-actions').innerHTML = `
+                                    <button class="match-action-btn" data-action="reschedule" data-id="${userId}">일정 변경</button>
+                                    <button class="match-action-btn" data-action="chat" data-id="${userId}">메시지</button>
+                                    <button class="match-action-btn" data-action="complete" data-id="${userId}">완료</button>
+                                `;
+                                
+                                // 버튼 이벤트 다시 설정
+                                setupMatchActions();
+                                
+                                window.parent.postMessage({
+                                    action: 'notification',
+                                    text: `${userName}님과의 일정이 ${date} ${time}에 잡혔습니다.`,
+                                    type: 'success'
+                                }, '*');
+                            }
+                        },
+                        {
+                            text: '취소',
+                            type: 'cancel'
+                        }
+                    ]
+                }, '*');
+                
+                // 직접 입력 선택 시 추가 필드 표시
+                setTimeout(() => {
+                    const locationSelect = document.getElementById('scheduleLocation');
+                    const customLocationGroup = document.getElementById('customLocationGroup');
+                    
+                    locationSelect.addEventListener('change', function() {
+                        if (this.value === '직접 입력') {
+                            customLocationGroup.style.display = 'block';
+                        } else {
+                            customLocationGroup.style.display = 'none';
+                        }
+                    });
+                }, 100);
+            }
+            
+            // 일정 변경
+            function rescheduleMatch(userId, userName) {
+                window.parent.postMessage({
+                    action: 'notification',
+                    text: `${userName}님과의 일정 변경은 메시지를 통해 상의해주세요.`,
+                    type: 'info'
+                }, '*');
+            }
+            
+            // 매칭 완료
+            function completeMatch(userId, userName, matchItem) {
+                const confirmed = confirm(`${userName}님과의 커피챗 미팅을 완료하시겠습니까?`);
+                
+                if (confirmed) {
+                    // 상태 업데이트
+                    matchItem.setAttribute('data-status', 'completed');
+                    const statusDiv = matchItem.querySelector('.match-status');
+                    statusDiv.textContent = `✅ ${new Date().toISOString().split('T')[0]} 완료`;
+                    statusDiv.className = 'match-status completed';
+                    
+                    // 버튼 업데이트
+                    matchItem.querySelector('.match-actions').innerHTML = `
+                        <button class="match-action-btn" data-action="review" data-id="${userId}">후기 작성</button>
+                        <button class="match-action-btn" data-action="chat" data-id="${userId}">메시지</button>
+                    `;
+                    
+                    // 목록 이동
+                    document.getElementById('completed-matches').appendChild(matchItem);
+                    
+                    // 버튼 이벤트 다시 설정
+                    setupMatchActions();
+                    
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: `${userName}님과의 커피챗 미팅이 완료되었습니다. 후기를 작성해보세요.`,
+                        type: 'success'
+                    }, '*');
+                    
+                    // 경험치 획득
+                    window.parent.postMessage({
+                        action: 'updateUser',
+                        userData: {
+                            exp: 100,
+                            points: 20
+                        }
+                    }, '*');
+                }
+            }
+            
+            // 후기 작성
+            function writeReview(userId, userName) {
+                const reviewContent = `
+                    <div class="form-group">
+                        <label class="form-label">평점</label>
+                        <select class="form-select" id="reviewRating">
+                            <option value="5">★★★★★ 매우 좋았어요</option>
+                            <option value="4">★★★★☆ 좋았어요</option>
+                            <option value="3">★★★☆☆ 보통이에요</option>
+                            <option value="2">★★☆☆☆ 아쉬웠어요</option>
+                            <option value="1">★☆☆☆☆ 별로였어요</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">후기 내용</label>
+                        <textarea class="form-textarea" id="reviewContent" placeholder="만남에 대한 후기를 작성해주세요."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">공개 여부</label>
+                        <select class="form-select" id="reviewPublic">
+                            <option value="public">공개 (커뮤니티에 공유)</option>
+                            <option value="private">비공개 (상대방에게만 공유)</option>
+                        </select>
+                    </div>
+                `;
+                
+                window.parent.postMessage({
+                    action: 'openModal',
+                    title: `${userName}님에 대한 후기 작성`,
+                    content: reviewContent,
+                    buttons: [
+                        {
+                            text: '제출',
+                            action: function() {
+                                const rating = document.getElementById('reviewRating').value;
+                                const content = document.getElementById('reviewContent').value;
+                                
+                                if (!content) {
+                                    alert('후기 내용을 입력해주세요.');
+                                    return false;
+                                }window.parent.postMessage({
+                                    action: 'notification',
+                                    text: `${userName}님에 대한 후기를 작성해주셔서 감사합니다.`,
+                                    type: 'success'
+                                }, '*');
+                                
+                                // 경험치 획득
+                                window.parent.postMessage({
+                                    action: 'updateUser',
+                                    userData: {
+                                        exp: 50,
+                                        points: 10
+                                    }
+                                }, '*');
+                            }
+                        },
+                        {
+                            text: '취소',
+                            type: 'cancel'
+                        }
+                    ]
+                }, '*');
+            }
+            
+            // 명령어 처리
+            function processCommand(command) {
+                if (!command.trim()) return;
+                
+                const commandLower = command.toLowerCase().trim();
+                
+                if (commandLower.startsWith('매치 ') || commandLower.startsWith('match ')) {
+                    const keyword = commandLower.split(' ')[1];
+                    searchMatch(keyword);
+                } else if (commandLower === 'refresh' || commandLower === '새로고침') {
+                    location.reload();
+                } else if (commandLower.startsWith('수락 ') || commandLower.startsWith('accept ')) {
+                    const userId = commandLower.split(' ')[1];
+                    const matchItem = document.querySelector(`.match-item[data-id="${userId}"]`);
+                    if (matchItem) {
+                        const userName = matchItem.querySelector('.match-name').textContent;
+                        acceptMatch(userId, userName, matchItem);
+                    } else {
+                        window.parent.postMessage({
+                            action: 'notification',
+                            text: `사용자 ID "${userId}"를 찾을 수 없습니다.`,
+                            type: 'error'
+                        }, '*');
+                    }
+                } else if (commandLower.startsWith('거절 ') || commandLower.startsWith('reject ')) {
+                    const userId = commandLower.split(' ')[1];
+                    const matchItem = document.querySelector(`.match-item[data-id="${userId}"]`);
+                    if (matchItem) {
+                        const userName = matchItem.querySelector('.match-name').textContent;
+                        rejectMatch(userId, userName, matchItem);
+                    } else {
+                        window.parent.postMessage({
+                            action: 'notification',
+                            text: `사용자 ID "${userId}"를 찾을 수 없습니다.`,
+                            type: 'error'
+                        }, '*');
+                    }
+                } else if (commandLower.startsWith('채팅 ') || commandLower.startsWith('chat ')) {
+                    const userId = commandLower.split(' ')[1];
+                    const matchItem = document.querySelector(`.match-item[data-id="${userId}"]`);
+                    if (matchItem) {
+                        const userName = matchItem.querySelector('.match-name').textContent;
+                        openChat(userId, userName);
+                    } else {
+                        window.parent.postMessage({
+                            action: 'notification',
+                            text: `사용자 ID "${userId}"를 찾을 수 없습니다.`,
+                            type: 'error'
+                        }, '*');
+                    }
+                } else if (commandLower.startsWith('일정 ') || commandLower.startsWith('schedule ')) {
+                    const parts = commandLower.split(' ');
+                    if (parts.length < 2) {
+                        window.parent.postMessage({
+                            action: 'notification',
+                            text: `명령어 형식이 잘못되었습니다. '일정 [ID]' 형식으로 입력해주세요.`,
+                            type: 'error'
+                        }, '*');
+                        return;
+                    }
+                    
+                    const userId = parts[1];
+                    const matchItem = document.querySelector(`.match-item[data-id="${userId}"]`);
+                    if (matchItem) {
+                        const userName = matchItem.querySelector('.match-name').textContent;
+                        scheduleMatch(userId, userName, matchItem);
+                    } else {
+                        window.parent.postMessage({
+                            action: 'notification',
+                            text: `사용자 ID "${userId}"를 찾을 수 없습니다.`,
+                            type: 'error'
+                        }, '*');
+                    }
+                } else if (commandLower === 'help' || commandLower === '도움말') {
+                    showHelp();
+                } else {
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: `'${command}' 명령어를 찾을 수 없습니다. 'help'를 입력하여 도움말을 확인하세요.`,
+                        type: 'error'
+                    }, '*');
+                }
+            }
+            
+            // 매칭 검색
+            function searchMatch(keyword) {
+                if (!keyword) {
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: '검색어를 입력해주세요.',
+                        type: 'error'
+                    }, '*');
+                    return;
+                }
+                
+                // 실제 구현에서는 API 호출을 통해 검색 결과를 가져옴
+                // 여기서는 간단한 시뮬레이션만 구현
+                window.parent.postMessage({
+                    action: 'notification',
+                    text: `"${keyword}" 키워드로 검색 중...`,
+                    type: 'info'
+                }, '*');
+                
+                // 로딩 시뮬레이션
+                setTimeout(() => {
+                    // 검색 결과 없음 시뮬레이션
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: `"${keyword}" 키워드에 맞는 사용자를 찾을 수 없습니다.`,
+                        type: 'error'
+                    }, '*');
+                }, 1500);
+            }
+            
+            // 도움말 표시
+            function showHelp() {
+                const helpContent = `
+                    <div class="message">- <span style="color: yellow;">매치 [키워드]</span>: 특정 키워드로 사용자 검색</div>
+                    <div class="message">- <span style="color: yellow;">수락 [ID]</span>: 매칭 요청 수락</div>
+                    <div class="message">- <span style="color: yellow;">거절 [ID]</span>: 매칭 요청 거절</div>
+                    <div class="message">- <span style="color: yellow;">채팅 [ID]</span>: 사용자와 채팅 시작</div>
+                    <div class="message">- <span style="color: yellow;">일정 [ID]</span>: 미팅 일정 설정</div>
+                    <div class="message">- <span style="color: yellow;">새로고침</span>: 페이지 새로고침</div>
+                `;
+                
+                window.parent.postMessage({
+                    action: 'openModal',
+                    title: '매칭 명령어 도움말',
+                    content: helpContent,
+                    buttons: [
+                        {
+                            text: '확인'
+                        }
+                    ]
+                }, '*');
+            }
+        });
+    </script>
+</body>
+</html>

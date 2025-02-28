@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로필 - 커피CMD</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/terminal.css">
+    <style>
+        /* 프로필 페이지 전용 스타일 */
+        .profile-container {
+            margin-bottom: 20px;
+        }
+        
+        .profile-section {
+            margin-bottom: 15px;
+        }
+        
+        .profile-item {
+            display: flex;
+            padding: 5px 0;
+        }
+        
+        .profile-label {
+            flex: 0 0 120px;
+            color: #999;
+        }
+        
+        .profile-value {
+            flex: 1;
+        }
+        
+        .profile-edit {
+            color: #0ff;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .profile-edit:hover {
+            text-decoration: underline;
+        }
+        
+        .interests-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .achievement {
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #333;
+            border-radius: 3px;
+        }
+        
+        .achievement:hover {
+            background-color: #031;
+            border-color: #0f0;
+        }
+        
+        .achievement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .achievement-title {
+            font-weight: bold;
+            color: #0f0;
+        }
+        
+        .achievement-date {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .achievement-icon {
+            margin-right: 5px;
+        }
+        
+        .profile-photo {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .photo-placeholder {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 1px solid #0f0;
+            color: #0f0;
+            line-height: 100px;
+            text-align: center;
+            font-size: 36px;
+            background-color: #031;
+            margin-bottom: 10px;
+        }
+        
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .stat-box {
+            flex: 1;
+            min-width: 100px;
+            padding: 10px;
+            border: 1px solid #0f0;
+            border-radius: 3px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            color: #0f0;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .settings-toggle {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .toggle-label {
+            margin-right: 10px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: #999;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #063;
+        }
+        
+        input:checked + .toggle-slider:before {
+            background-color: #0f0;
+            transform: translateX(20px);
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-screen">
+        <div class="message system-message">내 프로필 화면입니다. 개인 정보와 활동 내역을 확인하고 관리할 수 있습니다.</div>
+        
+        <div class="card">
+            <div class="card-title">기본 정보</div>
+            <div class="profile-container">
+                <div class="profile-photo">
+                    <div class="photo-placeholder" id="profileInitials">?</div>
+                    <button class="command-button" id="changePhotoBtn">사진 변경</button>
+                </div>
+                
+                <div class="profile-item">
+                    <div class="profile-label">이름</div>
+                    <div class="profile-value" id="profileName">프로필명을 설정해주세요</div>
+                    <div class="profile-edit" data-field="name">수정</div>
+                </div>
+                
+                <div class="profile-item">
+                    <div class="profile-label">직업</div>
+                    <div class="profile-value" id="profileJob">웹 개발자</div>
+                    <div class="profile-edit" data-field="job">수정</div>
+                </div>
+                
+                <div class="profile-item">
+                    <div class="profile-label">이메일</div>
+                    <div class="profile-value" id="profileEmail">이메일을 설정해주세요</div>
+                    <div class="profile-edit" data-field="email">수정</div>
+                </div>
+                
+                <div class="profile-item">
+                    <div class="profile-label">지역</div>
+                    <div class="profile-value" id="profileLocation">서울 강남구</div>
+                    <div class="profile-edit" data-field="location">수정</div>
+                </div>
+                
+                <div class="profile-item">
+                    <div class="profile-label">소개</div>
+                    <div class="profile-value" id="profileBio">자기소개를 입력해주세요.</div>
+                    <div class="profile-edit" data-field="bio">수정</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">레벨 및 경험치</div>
+            <div class="profile-container">
+                <div class="profile-item">
+                    <div class="profile-label">현재 레벨</div>
+                    <div class="profile-value" id="currentLevel">Lv.3</div>
+                </div>
+                
+                <div class="profile-item">
+                    <div class="profile-label">경험치</div>
+                    <div class="profile-value" id="expProgress">340/500</div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="expBar" style="width: 68%;"></div>
+                </div>
+                
+                <div class="profile-item">
+                    <div class="profile-label">다음 레벨까지</div>
+                    <div class="profile-value" id="remainingExp">160 XP</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">관심사 설정</div>
+            <div class="profile-container">
+                <div class="interests-container" id="interestsContainer">
+                    <span class="badge">JavaScript</span>
+                    <span class="badge">React</span>
+                    <span class="badge">UX/UI</span>
+                    <span class="badge">커피</span>
+                    <span class="badge">여행</span>
+                </div>
+                
+                <div class="profile-item" style="margin-top: 10px;">
+                    <button class="command-button" id="addInterestBtn">관심사 추가</button>
+                    <button class="command-button" id="removeInterestBtn">관심사 제거</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">활동 통계</div>
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-value" id="matchesCount">8</div>
+                    <div class="stat-label">총 매칭 수</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="meetingsCount">3</div>
+                    <div class="stat-label">완료된 미팅</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="recommendationsCount">5</div>
+                    <div class="stat-label">받은 추천</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="pointsCount">127</div>
+                    <div class="stat-label">활동 점수</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">획득한 뱃지</div>
+            <div class="profile-container">
+                <div class="achievement">
+                    <div class="achievement-header">
+                        <div class="achievement-title"><span class="achievement-icon">🌱</span> 첫 미팅 완료</div>
+                        <div class="achievement-date">2025-02-10</div>
+                    </div>
+                    <div>처음으로 커피챗 미팅을 성공적으로 완료했습니다.</div>
+                </div>
+                
+                <div class="achievement">
+                    <div class="achievement-header">
+                        <div class="achievement-title"><span class="achievement-icon">🔍</span> 탐험가</div>
+                        <div class="achievement-date">2025-02-15</div>
+                    </div>
+                    <div>다양한 직군의 사람들과 3회 이상 미팅을 진행했습니다.</div>
+                </div>
+                
+                <div class="achievement">
+                    <div class="achievement-header">
+                        <div class="achievement-title"><span class="achievement-icon">⭐</span> 좋은 평가</div>
+                        <div class="achievement-date">2025-02-22</div>
+                    </div>
+                    <div>미팅 후 5점 만점의 평가를 받았습니다.</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">앱 설정</div>
+            <div class="profile-container">
+                <div class="settings-toggle">
+                    <div class="toggle-label">알림 설정</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notificationToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-toggle">
+                    <div class="toggle-label">소리 효과</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="soundToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-toggle">
+                    <div class="toggle-label">다크모드</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="profile-item" style="margin-top: 10px;">
+                    <button class="command-button" id="resetSettingsBtn">설정 초기화</button>
+                    <button class="command-button" id="exportDataBtn">데이터 내보내기</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-line">
+            <span class="prompt">프로필></span>
+            <input type="text" class="command-input" id="commandInput" placeholder="'수정 [항목]' 명령어로 프로필을 수정하세요">
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const commandInput = document.getElementById('commandInput');
+            const addInterestBtn = document.getElementById('addInterestBtn');
+            const removeInterestBtn = document.getElementById('removeInterestBtn');
+            const changePhotoBtn = document.getElementById('changePhotoBtn');
+            const profileEditBtns = document.querySelectorAll('.profile-edit');
+            const notificationToggle = document.getElementById('notificationToggle');
+            const soundToggle = document.getElementById('soundToggle');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const resetSettingsBtn = document.getElementById('resetSettingsBtn');
+            const exportDataBtn = document.getElementById('exportDataBtn');
+            
+            // 부모 창에 사용자 데이터 요청
+            window.parent.postMessage({ action: 'getUser' }, '*');
+            
+            // 부모 창으로부터 메시지 수신
+            window.addEventListener('message', function(event) {
+                const message = event.data;
+                
+                if (message.action === 'userData') {
+                    updateUserData(message.userData);
+                }
+            });
+            
+            // 명령어 입력 처리
+            commandInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    processCommand(this.value);
+                    this.value = '';
+                }
+            });
+            
+            // 사용자 데이터 업데이트
+            function updateUserData(userData) {
+                // 기본 정보 업데이트
+                document.getElementById('profileName').textContent = userData.username || '프로필명을 설정해주세요';
+                if (userData.username) {
+                    // 이니셜 설정
+                    document.getElementById('profileInitials').textContent = userData.username.charAt(0);
+                }
+                
+                // 레벨 및 경험치 업데이트
+                document.getElementById('currentLevel').textContent = `Lv.${userData.level}`;
+                document.getElementById('expProgress').textContent = `${userData.exp}/${userData.expMax}`;
+                document.getElementById('expBar').style.width = `${(userData.exp / userData.expMax) * 100}%`;
+                document.getElementById('remainingExp').textContent = `${userData.expMax - userData.exp} XP`;
+                
+                // 관심사 업데이트
+                if (userData.interests && userData.interests.length > 0) {
+                    const interestsContainer = document.getElementById('interestsContainer');
+                    interestsContainer.innerHTML = '';
+                    
+                    userData.interests.forEach(interest => {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge';
+                        badge.textContent = interest;
+                        interestsContainer.appendChild(badge);
+                    });
+                }
+                
+                // 활동 통계 업데이트
+                document.getElementById('pointsCount').textContent = userData.points;
+                
+                // 앱 설정 업데이트
+                if (userData.settings) {
+                    notificationToggle.checked = userData.settings.notifications;
+                    soundToggle.checked = userData.settings.sounds;
+                    darkModeToggle.checked = userData.settings.theme === 'default';
+                }
+            }
+            
+            // 관심사 추가 버튼
+            addInterestBtn.addEventListener('click', function() {
+                const interestContent = `
+                    <div class="form-group">
+                        <label class="form-label">새 관심사</label>
+                        <input type="text" class="form-input" id="newInterest" placeholder="관심사를 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">추천 키워드</label>
+                        <div>
+                            <span class="badge" style="cursor:pointer;" onclick="document.getElementById('newInterest').value='백엔드'">백엔드</span>
+                            <span class="badge" style="cursor:pointer;" onclick="document.getElementById('newInterest').value='AI'">AI</span>
+                            <span class="badge" style="cursor:pointer;" onclick="document.getElementById('newInterest').value='디자인'">디자인</span>
+                            <span class="badge" style="cursor:pointer;" onclick="document.getElementById('newInterest').value='마케팅'">마케팅</span>
+                            <span class="badge" style="cursor:pointer;" onclick="document.getElementById('newInterest').value='스타트업'">스타트업</span>
+                        </div>
+                    </div>
+                `;
+                
+                window.parent.postMessage({
+                    action: 'openModal',
+                    title: '관심사 추가',
+                    content: interestContent,
+                    buttons: [
+                        {
+                            text: '추가',
+                            action: function() {
+                                const newInterest = document.getElementById('newInterest').value.trim();
+                                if (!newInterest) {
+                                    alert('관심사를 입력해주세요.');
+                                    return false;
+                                }
+                                
+                                // 관심사 추가
+                                const interestsContainer = document.getElementById('interestsContainer');
+                                const badge = document.createElement('span');
+                                badge.className = 'badge';
+                                badge.textContent = newInterest;
+                                interestsContainer.appendChild(badge);
+                                
+                                // 부모 창에 업데이트 전송
+                                window.parent.postMessage({
+                                    action: 'notification',
+                                    text: `'${newInterest}' 관심사가 추가되었습니다.`,
+                                    type: 'success'
+                                }, '*');
+                            }
+                        },
+                        {
+                            text: '취소',
+                            type: 'cancel'
+                        }
+                    ]
+                }, '*');
+            });
+            
+            // 관심사 제거 버튼
+            removeInterestBtn.addEventListener('click', function() {
+                const badges = document.querySelectorAll('#interestsContainer .badge');
+                
+                if (badges.length === 0) {
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: '제거할 관심사가 없습니다.',
+                        type: 'error'
+                    }, '*');
+                    return;
+                }
+                
+                // 현재 관심사 목록 가져오기
+                const interests = [];
+                badges.forEach(badge => {
+                    interests.push(badge.textContent);
+                });
+                
+                // 선택 목록 생성
+                let interestOptions = '';
+                interests.forEach(interest => {
+                    interestOptions += `<option value="${interest}">${interest}</option>`;
+                });
+                
+                const removeContent = `
+                    <div class="form-group">
+                        <label class="form-label">제거할 관심사</label>
+                        <select class="form-select" id="interestToRemove">
+                            ${interestOptions}
+                        </select>
+                    </div>
+                `;
+                
+                window.parent.postMessage({
+                    action: 'openModal',
+                    title: '관심사 제거',
+                    content: removeContent,
+                    buttons: [
+                        {
+                            text: '제거',
+                            action: function() {
+                                const interestToRemove = document.getElementById('interestToRemove').value;
+                                
+                                // 관심사 제거
+                                const badges = document.querySelectorAll('#interestsContainer .badge');
+                                badges.forEach(badge => {
+                                    if (badge.textContent === interestToRemove) {
+                                        badge.remove();
+                                    }
+                                });
+                                
+                                // 부모 창에 업데이트 전송
+                                window.parent.postMessage({
+                                    action: 'notification',
+                                    text: `'${interestToRemove}' 관심사가 제거되었습니다.`,
+                                    type: 'success'
+                                }, '*');
+                            }
+                        },
+                        {
+                            text: '취소',
+                            type: 'cancel'
+                        }
+                    ]
+                }, '*');
+            });
+            
+            // 사진 변경 버튼
+            changePhotoBtn.addEventListener('click', function() {
+                window.parent.postMessage({
+                    action: 'notification',
+                    text: '프로필 사진 기능은 현재 개발 중입니다.',
+                    type: 'info'
+                }, '*');
+            });
+            
+            // 프로필 수정 버튼들 처리
+            profileEditBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const field = this.getAttribute('data-field');
+                    const currentValue = document.getElementById(`profile${field.charAt(0).toUpperCase() + field.slice(1)}`).textContent;
+                    
+                    let inputType = 'text';
+                    let inputTag = 'input';
+                    
+                    if (field === 'bio') {
+                        inputTag = 'textarea';
+                    } else if (field === 'email') {
+                        inputType = 'email';
+                    }
+                    
+                    const editContent = `
+                        <div class="form-group">
+                            <label class="form-label">${field.charAt(0).toUpperCase() + field.slice(1)}</label>
+                            ${inputTag === 'textarea' 
+                                ? `<textarea class="form-textarea" id="edit${field}" placeholder="${field}를 입력하세요">${currentValue}</textarea>` 
+                                : `<input type="${inputType}" class="form-input" id="edit${field}" placeholder="${field}를 입력하세요" value="${currentValue}">`
+                            }
+                        </div>
+                    `;
+                    
+                    window.parent.postMessage({
+                        action: 'openModal',
+                        title: `${field.charAt(0).toUpperCase() + field.slice(1)} 수정`,
+                        content: editContent,
+                        buttons: [
+                            {
+                                text: '저장',
+                                action: function() {
+                                    const newValue = document.getElementById(`edit${field}`).value.trim();
+                                    
+                                    if (!newValue) {
+                                        alert(`${field}를 입력해주세요.`);
+                                        return false;
+                                    }
+                                    
+                                    // 프로필 필드 업데이트
+                                    document.getElementById(`profile${field.charAt(0).toUpperCase() + field.slice(1)}`).textContent = newValue;
+                                    
+                                    // 이름인 경우 이니셜도 업데이트
+                                    if (field === 'name') {
+                                        document.getElementById('profileInitials').textContent = newValue.charAt(0);
+                                    }
+                                    
+                                    // 부모 창에 업데이트 전송
+                                    window.parent.postMessage({
+                                        action: 'notification',
+                                        text: `${field.charAt(0).toUpperCase() + field.slice(1)}이(가) 업데이트되었습니다.`,
+                                        type: 'success'
+                                    }, '*');
+                                }
+                            },
+                            {
+                                text: '취소',
+                                type: 'cancel'
+                            }
+                        ]
+                    }, '*');
+                });
+            });
+            
+            // 설정 초기화 버튼
+            resetSettingsBtn.addEventListener('click', function() {
+                const confirmContent = `
+                    <div>정말로 모든 설정을 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.</div>
+                `;
+                
+                window.parent.postMessage({
+                    action: 'openModal',
+                    title: '설정 초기화 확인',
+                    content: confirmContent,
+                    buttons: [
+                        {
+                            text: '초기화',
+                            action: function() {
+                                // 토글 초기화
+                                notificationToggle.checked = true;
+                                soundToggle.checked = true;
+                                darkModeToggle.checked = true;
+                                
+                                // 부모 창에 업데이트 전송
+                                window.parent.postMessage({
+                                    action: 'notification',
+                                    text: '모든 설정이 초기화되었습니다.',
+                                    type: 'success'
+                                }, '*');
+                            }
+                        },
+                        {
+                            text: '취소',
+                            type: 'cancel'
+                        }
+                    ]
+                }, '*');
+            });
+            
+            // 데이터 내보내기 버튼
+            exportDataBtn.addEventListener('click', function() {
+                window.parent.postMessage({
+                    action: 'notification',
+                    text: '데이터 내보내기 기능은 현재 개발 중입니다.',
+                    type: 'info'
+                }, '*');
+            });
+            
+            // 설정 토글 처리
+            notificationToggle.addEventListener('change', function() {
+                window.parent.postMessage({
+                    action: 'updateUser',
+                    userData: {
+                        settings: {
+                            notifications: this.checked
+                        }
+                    }
+                }, '*');
+                
+                window.parent.postMessage({
+                    action: 'notification',
+                    text: `알림이 ${this.checked ? '활성화' : '비활성화'}되었습니다.`,
+                    type: 'info'
+                }, '*');
+            });
+            
+            soundToggle.addEventListener('change', function() {
+                window.parent.postMessage({
+                    action: 'updateUser',
+                    userData: {
+                        settings: {
+                            sounds: this.checked
+                        }
+                    }
+                }, '*');
+                
+                window.parent.postMessage({
+                    action: 'notification',
+                    text: `소리 효과가 ${this.checked ? '활성화' : '비활성화'}되었습니다.`,
+                    type: 'info'
+                }, '*');
+            });
+            
+            darkModeToggle.addEventListener('change', function() {
+                window.parent.postMessage({
+                    action: 'updateUser',
+                    userData: {
+                        settings: {
+                            theme: this.checked ? 'default' : 'light'
+                        }
+                    }
+                }, '*');
+                
+                window.parent.postMessage({
+                    action: 'notification',
+                    text: `${this.checked ? '다크' : '라이트'} 모드로 설정되었습니다.`,
+                    type: 'info'
+                }, '*');
+            });
+            
+            // 명령어 처리
+            function processCommand(command) {
+                if (!command.trim()) return;
+                
+                const commandLower = command.toLowerCase().trim();
+                
+                if (commandLower.startsWith('수정 ') || commandLower.startsWith('edit ')) {
+                    const field = commandLower.split(' ')[1];
+                    const validFields = ['name', '이름', 'job', '직업', 'email', '이메일', 'location', '지역', 'bio', '소개'];
+                    
+                    if (!validFields.includes(field)) {
+                        window.parent.postMessage({
+                            action: 'notification',
+                            text: `유효한 필드 이름이 아닙니다. 수정 가능한 필드: 이름, 직업, 이메일, 지역, 소개`,
+                            type: 'error'
+                        }, '*');
+                        return;
+                    }
+                    
+                    // 필드 영문 변환
+                    let englishField = field;
+                    if (field === '이름') englishField = 'name';
+                    else if (field === '직업') englishField = 'job';
+                    else if (field === '이메일') englishField = 'email';
+                    else if (field === '지역') englishField = 'location';
+                    else if (field === '소개') englishField = 'bio';
+                    
+                    // 해당 필드의 수정 버튼 클릭
+                    document.querySelector(`.profile-edit[data-field="${englishField}"]`).click();
+                } else if (commandLower === 'reset' || commandLower === '초기화') {
+                    resetSettingsBtn.click();
+                } else if (commandLower === 'help' || commandLower === '도움말') {
+                    showHelp();
+                } else {
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: `'${command}' 명령어를 찾을 수 없습니다. 'help'를 입력하여 도움말을 확인하세요.`,
+                        type: 'error'
+                    }, '*');
+                }
+            }
+            
+            // 도움말 표시
+            function showHelp() {
+                const helpContent = `
+                    <div class="message">- <span style="color: yellow;">수정 [항목]</span>: 프로필 정보 수정 (항목: 이름, 직업, 이메일, 지역, 소개)</div>
+                    <div class="message">- <span style="color: yellow;">초기화</span>: 앱 설정 초기화</div>
+                    <div class="message">- <span style="color: yellow;">도움말</span>: 이 도움말 표시</div>
+                `;
+                
+                window.parent.postMessage({
+                    action: 'openModal',
+                    title: '프로필 명령어 도움말',
+                    content: helpContent,
+                    buttons: [
+                        {
+                            text: '확인'
+                        }
+                    ]
+                }, '*');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도움말 - 커피CMD</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/terminal.css">
+    <style>
+        /* 도움말 페이지 전용 스타일 */
+        .help-container {
+            margin-bottom: 20px;
+        }
+        
+        .help-section {
+            margin-bottom: 25px;
+        }
+        
+        .help-section h3 {
+            color: #0f0;
+            border-bottom: 1px dashed #0f0;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .help-item {
+            display: flex;
+            margin: 10px 0;
+        }
+        
+        .help-command {
+            flex: 0 0 200px;
+            color: yellow;
+        }
+        
+        .help-description {
+            flex: 1;
+        }
+        
+        .help-example {
+            color: #999;
+            margin-top: 3px;
+            font-style: italic;
+            font-size: 14px;
+        }
+        
+        .cmd-key {
+            background-color: #222;
+            border: 1px solid #0f0;
+            padding: 1px 5px;
+            border-radius: 3px;
+            color: #0f0;
+            display: inline-block;
+            margin: 0 2px;
+            font-size: 12px;
+        }
+        
+        .tip-box {
+            background-color: #031;
+            border: 1px solid #0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+        
+        .search-results {
+            margin-top: 15px;
+            border-top: 1px dashed #0f0;
+            padding-top: 10px;
+            display: none;
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 5px 10px;
+            cursor: pointer;
+            border: 1px solid #0f0;
+            border-bottom: none;
+            margin-right: 5px;
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+        }
+        
+        .tab.active {
+            background-color: #031;
+            color: #0f0;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 0;
+            margin-bottom: 15px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-screen">
+        <div class="message system-message">커피CMD 도움말 화면입니다. 명령어와 기능에 대한 설명을 확인하세요.</div>
+        
+        <div class="search-bar">
+            <input type="text" class="form-input search-input" id="searchInput" placeholder="도움말 검색">
+            <button class="command-button" id="searchButton">검색</button>
+        </div>
+        
+        <div class="search-results" id="searchResults">
+            <div class="message system-message">검색 결과:</div>
+            <div id="resultsList"></div>
+        </div>
+        
+        <div class="tab-container">
+            <div class="tab active" data-tab="commands">명령어</div>
+            <div class="tab" data-tab="features">주요 기능</div>
+            <div class="tab" data-tab="tips">사용 팁</div>
+            <div class="tab" data-tab="faq">자주 묻는 질문</div>
+        </div>
+        
+        <!-- 명령어 탭 -->
+        <div class="tab-content active" id="commands-tab">
+            <div class="help-section">
+                <h3>기본 명령어</h3>
+                <div class="help-item">
+                    <div class="help-command">help / 도움말</div>
+                    <div class="help-description">
+                        <div>도움말 화면을 표시합니다.</div>
+                        <div class="help-example">예: help</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">home / 홈</div>
+                    <div class="help-description">
+                        <div>홈 화면으로 이동합니다.</div>
+                        <div class="help-example">예: home</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">clear / cls / 초기화</div>
+                    <div class="help-description">
+                        <div>현재 화면을 지웁니다.</div>
+                        <div class="help-example">예: clear</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">refresh / 새로고침</div>
+                    <div class="help-description">
+                        <div>현재 화면을 새로고침합니다.</div>
+                        <div class="help-example">예: refresh</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>매칭 명령어</h3>
+                <div class="help-item">
+                    <div class="help-command">매치 [키워드]</div>
+                    <div class="help-description">
+                        <div>특정 키워드로 매칭할 사용자를 검색합니다.</div>
+                        <div class="help-example">예: 매치 개발자</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">수락 [ID]</div>
+                    <div class="help-description">
+                        <div>특정 사용자의 매칭 요청을 수락합니다.</div>
+                        <div class="help-example">예: 수락 user2</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">거절 [ID]</div>
+                    <div class="help-description">
+                        <div>특정 사용자의 매칭 요청을 거절합니다.</div>
+                        <div class="help-example">예: 거절 user3</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">일정 [ID]</div>
+                    <div class="help-description">
+                        <div>특정 사용자와 미팅 일정을 설정합니다.</div>
+                        <div class="help-example">예: 일정 user4</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>채팅 명령어</h3>
+                <div class="help-item">
+                    <div class="help-command">채팅 [ID]</div>
+                    <div class="help-description">
+                        <div>특정 사용자와 채팅을 시작합니다.</div>
+                        <div class="help-example">예: 채팅 user1</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">이모티콘</div>
+                    <div class="help-description">
+                        <div>이모티콘 패널을 엽니다.</div>
+                        <div class="help-example">예: 이모티콘</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">저장</div>
+                    <div class="help-description">
+                        <div>현재 채팅을 저장합니다.</div>
+                        <div class="help-example">예: 저장</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>프로필 명령어</h3>
+                <div class="help-item">
+                    <div class="help-command">수정 [항목]</div>
+                    <div class="help-description">
+                        <div>프로필 정보를 수정합니다.</div>
+                        <div class="help-example">예: 수정 이름</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">관심사 추가</div>
+                    <div class="help-description">
+                        <div>새로운 관심사를 추가합니다.</div>
+                        <div class="help-example">예: 관심사 추가</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">관심사 제거</div>
+                    <div class="help-description">
+                        <div>기존 관심사를 제거합니다.</div>
+                        <div class="help-example">예: 관심사 제거</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>커뮤니티 명령어</h3>
+                <div class="help-item">
+                    <div class="help-command">글쓰기</div>
+                    <div class="help-description">
+                        <div>새 게시글을 작성합니다.</div>
+                        <div class="help-example">예: 글쓰기</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">검색 [키워드]</div>
+                    <div class="help-description">
+                        <div>게시글을 검색합니다.</div>
+                        <div class="help-example">예: 검색 React</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">게시판 [ID]</div>
+                    <div class="help-description">
+                        <div>특정 게시판으로 이동합니다.</div>
+                        <div class="help-example">예: 게시판 dev</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>카페 정보 명령어</h3>
+                <div class="help-item">
+                    <div class="help-command">검색 [키워드]</div>
+                    <div class="help-description">
+                        <div>카페를 검색합니다.</div>
+                        <div class="help-example">예: 검색 강남</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">일정 [카페ID]</div>
+                    <div class="help-description">
+                        <div>해당 카페에서 일정을 잡습니다.</div>
+                        <div class="help-example">예: 일정 cafe1</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">상세 [카페ID]</div>
+                    <div class="help-description">
+                        <div>카페 상세 정보를 확인합니다.</div>
+                        <div class="help-example">예: 상세 cafe2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 주요 기능 탭 -->
+        <div class="tab-content" id="features-tab">
+            <div class="help-section">
+                <h3>매칭 시스템</h3>
+                <div class="help-item">
+                    <div class="help-command">관심사 기반 매칭</div>
+                    <div class="help-description">
+                        <div>사용자의 관심사와 직업을 기반으로 적합한 매칭 상대를 추천해 줍니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">지역 기반 매칭</div>
+                    <div class="help-description">
+                        <div>같은 지역에 있는 사용자들을 우선적으로 매칭해 줍니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">일정 관리</div>
+                    <div class="help-description">
+                        <div>매칭된 사용자와 쉽게 일정을 잡고 관리할 수 있습니다.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>채팅 시스템</h3>
+                <div class="help-item">
+                    <div class="help-command">실시간 채팅</div>
+                    <div class="help-description">
+                        <div>매칭된 사용자와 실시간으로 대화할 수 있습니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">이모티콘 지원</div>
+                    <div class="help-description">
+                        <div>다양한 이모티콘을 사용하여 더 풍부한 대화를 나눌 수 있습니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">채팅 저장</div>
+                    <div class="help-description">
+                        <div>중요한 대화 내용을 저장하고 나중에 다시 볼 수 있습니다.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>커뮤니티 기능</h3>
+                <div class="help-item">
+                    <div class="help-command">관심사별 게시판</div>
+                    <div class="help-description">
+                        <div>다양한 주제별 게시판에서 정보를 공유하고 소통할 수 있습니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">Q&A</div>
+                    <div class="help-description">
+                        <div>궁금한 점을 질문하고 다른 사용자들의 답변을 받을 수 있습니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">후기 시스템</div>
+                    <div class="help-description">
+                        <div>커피챗 경험을 공유하고 다른 사용자들의 후기를 볼 수 있습니다.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>카페 정보</h3>
+                <div class="help-item">
+                    <div class="help-command">추천 카페</div>
+                    <div class="help-description">
+                        <div>미팅하기 좋은 카페를 지역별, 특성별로 추천해 줍니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">카페 리뷰</div>
+                    <div class="help-description">
+                        <div>다른 사용자들의 카페 리뷰를 확인할 수 있습니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">프로모션 정보</div>
+                    <div class="help-description">
+                        <div>카페에서 제공하는 할인 쿠폰이나 이벤트 정보를 확인할 수 있습니다.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>레벨 및 포인트</h3>
+                <div class="help-item">
+                    <div class="help-command">경험치 획득</div>
+                    <div class="help-description">
+                        <div>다양한 활동을 통해 경험치를 획득하고 레벨을 올릴 수 있습니다.</div>
+                        <div class="help-example">- 매칭 완료: 100 XP</div>
+                        <div class="help-example">- 후기 작성: 50 XP</div>
+                        <div class="help-example">- 게시글 작성: 30 XP</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">활동 점수</div>
+                    <div class="help-description">
+                        <div>활동 점수에 따라 추가 혜택을 받을 수 있습니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">뱃지 획득</div>
+                    <div class="help-description">
+                        <div>특별한 성과를 달성하면 뱃지를 획득할 수 있습니다.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 사용 팁 탭 -->
+        <div class="tab-content" id="tips-tab">
+            <div class="help-section">
+                <h3>효과적인 매칭을 위한 팁</h3>
+                <div class="tip-box">
+                    <p>1. <strong>상세한 프로필을 작성하세요.</strong> 관심사와 직업 정보가 자세할수록 더 적합한 매칭이 이루어집니다.</p>
+                    <p>2. <strong>구체적인 목표를 설정하세요.</strong> 미팅에서 얻고자 하는 바를 명확히 하면 더 의미 있는 대화가 가능합니다.</p>
+                    <p>3. <strong>다양한 직업군의 사람들과 매칭해보세요.</strong> 다양한 관점에서 새로운 인사이트를 얻을 수 있습니다.</p>
+                    <p>4. <strong>좋은 평가를 많이 받을수록 매칭 확률이 높아집니다.</strong> 성실하고 도움이 되는 미팅을 진행하세요.</p>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>성공적인 커피챗을 위한 팁</h3>
+                <div class="tip-box">
+                    <p>1. <strong>사전에 질문 리스트를 준비하세요.</strong> 대화가 끊기지 않고 목적에 맞는 정보를 얻을 수 있습니다.</p>
+                    <p>2. <strong>미팅 시간은 45분에서 1시간이 적당합니다.</strong> 너무 길면 집중력이 떨어지고, 너무 짧으면 깊이 있는 대화가 어렵습니다.</p>
+                    <p>3. <strong>경청하는 자세를 갖추세요.</strong> 상대방의 이야기를 주의 깊게 듣고 관련 질문을 이어가는 것이 중요합니다.</p>
+                    <p>4. <strong>약속 시간을 꼭 지켜주세요.</strong> 시간을 존중하는 것은 기본적인 예의입니다.</p>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>커뮤니티 활용 팁</h3>
+                <div class="tip-box">
+                    <p>1. <strong>정기적으로 게시글을 확인하세요.</strong> 관심 분야의 최신 정보를 얻을 수 있습니다.</p>
+                    <p>2. <strong>질문하기를 두려워하지 마세요.</strong> 사소한 질문도 다른 사람에게는 도움이 될 수 있습니다.</p>
+                    <p>3. <strong>본인의 경험을 공유해보세요.</strong> 경험 공유는 자신의 생각을 정리하는 데도 도움이 됩니다.</p>
+                    <p>4. <strong>다른 사용자의 질문에 답변해보세요.</strong> 지식을 공유하면서 자신의 전문성도 높일 수 있습니다.</p>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>카페 선택 팁</h3>
+                <div class="tip-box">
+                    <p>1. <strong>소음 수준을 고려하세요.</strong> 너무 시끄러운 카페는 대화에 집중하기 어렵습니다.</p>
+                    <p>2. <strong>테이블 크기를 확인하세요.</strong> 노트북이나 자료를 펼쳐야 한다면 넓은 테이블이 있는 카페가 좋습니다.</p>
+                    <p>3. <strong>혼잡한 시간대를 피하세요.</strong> 오전 10시~11시, 오후 2시~5시가 비교적 한적합니다.</p>
+                    <p>4. <strong>위치 접근성을 고려하세요.</strong> 양쪽 모두 접근하기 편한 장소를 선택하는 것이 좋습니다.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 자주 묻는 질문 탭 -->
+        <div class="tab-content" id="faq-tab">
+            <div class="help-section">
+                <h3>계정 관련 FAQ</h3>
+                <div class="help-item">
+                    <div class="help-command">Q: 프로필은 어떻게 수정하나요?</div>
+                    <div class="help-description">
+                        <div>A: '프로필' 화면으로 이동한 후 각 항목 옆의 '수정' 버튼을 클릭하거나 '수정 [항목]' 명령어를 사용하여 프로필 정보를 수정할 수 있습니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">Q: 계정을 삭제하려면 어떻게 해야 하나요?</div>
+                    <div class="help-description">
+                        <div>A: '프로필' > '설정' 메뉴에서 '계정 삭제' 옵션을 선택하면 됩니다. 계정 삭제 시 모든 데이터가 영구적으로 제거되니 신중하게 결정해주세요.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">Q: 비밀번호를 잊어버렸어요.</div>
+                    <div class="help-description">
+                        <div>A: 로그인 화면에서 '비밀번호 찾기' 옵션을 선택하면 가입 시 등록한 이메일로 재설정 링크가 발송됩니다.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>매칭 관련 FAQ</h3>
+                <div class="help-item">
+                    <div class="help-command">Q: 매칭이 잘 이루어지지 않아요.</div>
+                    <div class="help-description">
+                        <div>A: 프로필 정보를 더 상세하게 입력하고, 관심사를 구체적으로 설정해보세요. 또한 활동 반경을 넓히면 더 많은 매칭 기회가 생깁니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">Q: 매칭된 상대가 마음에 들지 않아요.</div>
+                    <div class="help-description">
+                        <div>A: '거절' 기능을 사용하여 매칭을 거절할 수 있습니다. 거절 사유를 선택하면 더 나은 매칭 알고리즘 개선에 도움이 됩니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">Q: 매칭 상대에게 신고하려면 어떻게 해야 하나요?</div>
+                    <div class="help-description">
+                        <div>A: 채팅 화면에서 상대방 프로필 옆의 '더보기' 메뉴를 클릭한 후 '신고하기' 옵션을 선택하면 됩니다.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>기능 관련 FAQ</h3>
+                <div class="help-item">
+                    <div class="help-command">Q: 채팅 기록은 얼마나 오래 저장되나요?</div>
+                    <div class="help-description">
+                        <div>A: 채팅 기록은 기본적으로 6개월간 저장됩니다. '저장' 기능을 사용하면 영구적으로 보관할 수 있습니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">Q: 알림을 끄려면 어떻게 해야 하나요?</div>
+                    <div class="help-description">
+                        <div>A: '프로필' > '설정' 메뉴에서 알림 설정을 변경할 수 있습니다. 알림 유형별로 개별 설정이 가능합니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">Q: 다크모드 설정은 어디서 하나요?</div>
+                    <div class="help-description">
+                        <div>A: '프로필' > '설정' 메뉴에서 테마 설정을 변경하거나, '테마 다크' 또는 '테마 라이트' 명령어를 사용할 수 있습니다.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>기타 FAQ</h3>
+                <div class="help-item">
+                    <div class="help-command">Q: 버그를 발견했어요. 어디에 신고하나요?</div>
+                    <div class="help-description">
+                        <div>A: '도움말' > '문의하기' 메뉴를 통해 버그 신고 및 기능 개선 제안을 할 수 있습니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">Q: 더 많은 이모티콘을 사용할 수 있나요?</div>
+                    <div class="help-description">
+                        <div>A: 기본 이모티콘 외에 추가 이모티콘 팩은 레벨 5부터 사용할 수 있습니다.</div>
+                    </div>
+                </div>
+                
+                <div class="help-item">
+                    <div class="help-command">Q: 해외에서도 사용할 수 있나요?</div>
+                    <div class="help-description">
+                        <div>A: 현재는 국내 서비스만 지원하고 있으며, 해외 서비스는 개발 중입니다.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-line">
+            <span class="prompt">도움말></span>
+            <input type="text" class="command-input" id="commandInput" placeholder="도움이 필요한 명령어나 키워드를 입력하세요">
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const commandInput = document.getElementById('commandInput');
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const searchResults = document.getElementById('searchResults');
+            const resultsList = document.getElementById('resultsList');
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // 탭 전환 처리
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // 활성 탭 변경
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 탭 내용 변경
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // 검색 버튼 처리
+            searchButton.addEventListener('click', function() {
+                const keyword = searchInput.value.trim();
+                if (keyword) {
+                    searchHelp(keyword);
+                } else {
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: '검색어를 입력해주세요.',
+                        type: 'error'
+                    }, '*');
+                }
+            });
+            
+            // 검색 입력창 엔터 처리
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    searchButton.click();
+                }
+            });
+            
+            // 명령어 입력 처리
+            commandInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    processCommand(this.value);
+                    this.value = '';
+                }
+            });
+            
+            // 도움말 검색
+            function searchHelp(keyword) {
+                // 검색 결과 표시
+                searchResults.style.display = 'block';
+                resultsList.innerHTML = '';
+                
+                // 모든 도움말 항목에서 검색
+                const helpItems = document.querySelectorAll('.help-item');
+                let matchCount = 0;
+                
+                helpItems.forEach(item => {
+                    const command = item.querySelector('.help-command').textContent.toLowerCase();
+                    const description = item.querySelector('.help-description').textContent.toLowerCase();
+                    
+                    if (command.includes(keyword.toLowerCase()) || description.includes(keyword.toLowerCase())) {
+                        // 검색 결과 항목 생성
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'help-item';
+                        resultItem.innerHTML = item.innerHTML;
+                        resultsList.appendChild(resultItem);
+                        matchCount++;
+                    }
+                });
+                
+                if (matchCount === 0) {
+                    resultsList.innerHTML = '<div class="message system-message">검색 결과가 없습니다.</div>';
+                }
+                
+                // 결과 영역으로 스크롤
+                searchResults.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // 명령어 처리
+            function processCommand(command) {
+                if (!command.trim()) return;
+                
+                const commandLower = command.toLowerCase().trim();
+                
+                if (commandLower === 'clear' || commandLower === 'cls' || commandLower === '초기화') {
+                    // 검색 결과 숨기기
+                    searchResults.style.display = 'none';
+                    searchInput.value = '';
+                    
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: '화면이 초기화되었습니다.',
+                        type: 'info'
+                    }, '*');
+                } else if (commandLower.startsWith('검색 ') || commandLower.startsWith('search ')) {
+                    const keyword = commandLower.split(' ').slice(1).join(' ');
+                    searchInput.value = keyword;
+                    searchHelp(keyword);
+                } else if (commandLower.startsWith('탭 ') || commandLower.startsWith('tab ')) {
+                    const tabName = commandLower.split(' ')[1];
+                    
+                    // 탭 전환
+                    if (['commands', '명령어'].includes(tabName)) {
+                        document.querySelector('[data-tab="commands"]').click();
+                    } else if (['features', '기능'].includes(tabName)) {
+                        document.querySelector('[data-tab="features"]').click();
+                    } else if (['tips', '팁'].includes(tabName)) {
+                        document.querySelector('[data-tab="tips"]').click();
+                    } else if (['faq', '질문'].includes(tabName)) {
+                        document.querySelector('[data-tab="faq"]').click();
+                    } else {
+                        window.parent.postMessage({
+                            action: 'notification',
+                            text: `'${tabName}' 탭을 찾을 수 없습니다.`,
+                            type: 'error'
+                        }, '*');
+                    }
+                } else if (['home', '홈'].includes(commandLower)) {
+                    window.parent.postMessage({
+                        action: 'navigate',
+                        screen: 'home'
+                    }, '*');
+                } else if (commandLower === 'refresh' || commandLower === '새로고침') {
+                    location.reload();
+                } else {
+                    // 명령어를 검색어로 처리
+                    searchInput.value = command;
+                    searchHelp(command);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

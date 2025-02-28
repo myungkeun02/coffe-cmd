@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카페 정보 - 커피CMD</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/terminal.css">
+    <style>
+        /* 카페 정보 페이지 전용 스타일 */
+        .cafes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .cafe-item {
+            padding: 10px;
+            border: 1px solid #333;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        .cafe-item:hover {
+            background-color: #031;
+            border-color: #0f0;
+        }
+        
+        .cafe-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .cafe-name {
+            font-weight: bold;
+            color: yellow;
+        }
+        
+        .cafe-rating {
+            color: #0f0;
+        }
+        
+        .cafe-address {
+            margin-bottom: 5px;
+        }
+        
+        .cafe-features {
+            margin-bottom: 5px;
+        }
+        
+        .cafe-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #999;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .cafe-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .cafe-tag {
+            background-color: #333;
+            color: #0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .map-container {
+            height: 300px;
+            border: 1px solid #0f0;
+            margin-bottom: 15px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-style: italic;
+            color: #999;
+            background-color: #111;
+        }
+        
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #0f0;
+            border-radius: 3px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .filter-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 3px;
+        }
+        
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .badge.selected {
+            background-color: #006600;
+        }
+        
+        .search-bar {
+            display: flex;
+            margin-bottom: 15px;
+            gap: 5px;
+        }
+        
+        .search-input {
+            flex: 1;
+        }
+        
+        .cafe-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .cafe-info {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .cafe-thumbnail {
+            width: 120px;
+            height: 80px;
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #999;
+            font-size: 12px;
+            border: 1px solid #0f0;
+        }
+        
+        .cafe-content {
+            flex: 1;
+        }
+        
+        .cafe-description {
+            margin-bottom: 10px;
+        }
+        
+        .cafe-features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .cafe-feature {
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-icon {
+            margin-right: 5px;
+            color: #0f0;
+        }
+        
+        .recommendation-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            background-color: #063;
+            color: #fff;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .promotion-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            background-color: #630;
+            color: #fff;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-screen">
+        <div class="message system-message">추천 카페 정보 화면입니다. 미팅하기 좋은 카페를 찾아보세요.</div>
+        
+        <div class="search-bar">
+            <input type="text" class="form-input search-input" id="searchInput" placeholder="카페 이름 또는 위치 검색">
+            <button class="command-button" id="searchButton">검색</button>
+        </div>
+        
+        <div class="filter-bar">
+            <div class="filter-group">
+                <div class="filter-label">지역</div>
+                <div class="filter-options">
+                    <span class="badge selected" data-filter="location" data-value="all">전체</span>
+                    <span class="badge" data-filter="location" data-value="강남">강남</span>
+                    <span class="badge" data-filter="location" data-value="홍대">홍대</span>
+                    <span class="badge" data-filter="location" data-value="판교">판교</span>
+                    <span class="badge" data-filter="location" data-value="성수">성수</span>
+                    <span class="badge" data-filter="location" data-value="여의도">여의도</span>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <div class="filter-label">특징</div>
+                <div class="filter-options">
+                    <span class="badge selected" data-filter="feature" data-value="all">전체</span>
+                    <span class="badge" data-filter="feature" data-value="조용함">조용함</span>
+                    <span class="badge" data-filter="feature" data-value="콘센트">콘센트</span>
+                    <span class="badge" data-filter="feature" data-value="와이파이">와이파이</span>
+                    <span class="badge" data-filter="feature" data-value="넓은자리">넓은자리</span>
+                    <span class="badge" data-filter="feature" data-value="주차">주차</span>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <div class="filter-label">정렬</div>
+                <div class="filter-options">
+                    <span class="badge selected" data-filter="sort" data-value="popular">인기순</span>
+                    <span class="badge" data-filter="sort" data-value="rating">평점순</span>
+                    <span class="badge" data-filter="sort" data-value="recent">최신순</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="map-container">
+            <div>지도 기능은 현재 개발 중입니다. 추후 업데이트될 예정입니다.</div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">인기 미팅 장소</div>
+            <div class="cafes-container" id="popularCafes">
+                <div class="cafe-item" data-id="cafe1" data-location="강남" data-features="조용함,콘센트,와이파이">
+                    <div class="cafe-header">
+                        <div class="cafe-name">스타벅스 강남점 <span class="recommendation-tag">추천</span></div>
+                        <div class="cafe-rating">★★★★☆ 4.5</div>
+                    </div>
+                    <div class="cafe-address">서울 강남구 테헤란로 101</div>
+                    <div class="cafe-features">2층 테이블 자리 넓음, 와이파이 빠름, 소음 적음</div>
+                    <div class="cafe-meta">
+                        <div>추천 시간: 평일 오후 1시~4시</div>
+                        <div>👍 32</div>
+                    </div>
+                    <div class="cafe-tags">
+                        <div class="cafe-tag">넓은 공간</div>
+                        <div class="cafe-tag">조용함</div>
+                        <div class="cafe-tag">콘센트 많음</div>
+                    </div>
+                </div>
+                
+                <div class="cafe-item" data-id="cafe2" data-location="성수" data-features="조용함,콘센트,넓은자리">
+                    <div class="cafe-header">
+                        <div class="cafe-name">카페 공명 <span class="promotion-tag">쿠폰</span></div>
+                        <div class="cafe-rating">★★★★★ 4.8</div>
+                    </div>
+                    <div class="cafe-address">서울 성동구 뚝섬로 123</div>
+                    <div class="cafe-features">독립된 미팅룸 있음, 조용한 분위기, 디저트 맛있음</div>
+                    <div class="cafe-meta">
+                        <div>쿠폰: 커피챗 예약 시 아메리카노 1+1</div>
+                        <div>👍 28</div>
+                    </div>
+                    <div class="cafe-tags">
+                        <div class="cafe-tag">미팅룸</div>
+                        <div class="cafe-tag">디저트</div>
+                        <div class="cafe-tag">프로모션</div>
+                    </div>
+                </div>
+                
+                <div class="cafe-item" data-id="cafe3" data-location="홍대" data-features="와이파이,넓은자리">
+                    <div class="cafe-header">
+                        <div class="cafe-name">카페 노마드</div>
+                        <div class="cafe-rating">★★★★☆ 4.3</div>
+                    </div>
+                    <div class="cafe-address">서울 마포구 양화로 45</div>
+                    <div class="cafe-features">콘센트 많음, 오래 있어도 눈치 안줌, 테라스 자리 있음</div>
+                    <div class="cafe-meta">
+                        <div>추천 메뉴: 더치커피, 바닐라 라떼</div>
+                        <div>👍 25</div>
+                    </div>
+                    <div class="cafe-tags">
+                        <div class="cafe-tag">테라스</div>
+                        <div class="cafe-tag">오래 있기</div>
+                        <div class="cafe-tag">분위기</div>
+                    </div>
+                </div>
+                
+                <div class="cafe-item" data-id="cafe4" data-location="판교" data-features="조용함,콘센트,와이파이,주차">
+                    <div class="cafe-header">
+                        <div class="cafe-name">커피 팩토리 판교점 <span class="recommendation-tag">추천</span></div>
+                        <div class="cafe-rating">★★★★☆ 4.4</div>
+                    </div>
+                    <div class="cafe-address">경기 성남시 분당구 판교역로 42</div>
+                    <div class="cafe-features">IT 종사자들이 많이 찾는 곳, 주차 2시간 무료, 자리 넓음</div>
+                    <div class="cafe-meta">
+                        <div>추천 시간: 평일 오전 10시~12시</div>
+                        <div>👍 23</div>
+                    </div>
+                    <div class="cafe-tags">
+                        <div class="cafe-tag">주차 가능</div>
+                        <div class="cafe-tag">IT 인맥</div>
+                        <div class="cafe-tag">노트북</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">새로 추가된 카페</div>
+            <div class="cafes-container" id="newCafes">
+                <div class="cafe-item" data-id="cafe5" data-location="여의도" data-features="조용함,콘센트,와이파이">
+                    <div class="cafe-header">
+                        <div class="cafe-name">브루잉 포인트 <span class="promotion-tag">신규</span></div>
+                        <div class="cafe-rating">★★★★☆ 4.6</div>
+                    </div>
+                    <div class="cafe-address">서울 영등포구 여의대로 120</div>
+                    <div class="cafe-features">금융권 종사자들이 많이 찾는 곳, 개인 작업 공간 분리</div>
+                    <div class="cafe-meta">
+                        <div>신규 오픈: 2025년 2월</div>
+                        <div>👍 18</div>
+                    </div>
+                    <div class="cafe-tags">
+                        <div class="cafe-tag">금융권</div>
+                        <div class="cafe-tag">스페셜티</div>
+                        <div class="cafe-tag">신규</div>
+                    </div>
+                </div>
+                
+                <div class="cafe-item" data-id="cafe6" data-location="성수" data-features="와이파이,넓은자리">
+                    <div class="cafe-header">
+                        <div class="cafe-name">블루보틀 성수점</div>
+                        <div class="cafe-rating">★★★★☆ 4.2</div>
+                    </div>
+                    <div class="cafe-address">서울 성동구 아차산로 70</div>
+                    <div class="cafe-features">인테리어가 멋진 카페, 사진찍기 좋음, 커피 품질 높음</div>
+                    <div class="cafe-meta">
+                        <div>추천 메뉴: 콜드브루, 뉴올리언스</div>
+                        <div>👍 21</div>
+                    </div>
+                    <div class="cafe-tags">
+                        <div class="cafe-tag">인테리어</div>
+                        <div class="cafe-tag">포토존</div>
+                        <div class="cafe-tag">스페셜티</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-line">
+            <span class="prompt">카페></span>
+            <input type="text" class="command-input" id="commandInput" placeholder="'검색 [지역명]' 명령어로 카페를 검색하세요">
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const commandInput = document.getElementById('commandInput');
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            
+            // 필터 이벤트 처리
+            setupFilters();
+            
+            // 카페 항목 클릭 처리
+            setupCafeClicks();
+            
+            // 검색 버튼 처리
+            searchButton.addEventListener('click', function() {
+                const keyword = searchInput.value.trim();
+                if (keyword) {
+                    searchCafes(keyword);
+                } else {
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: '검색어를 입력해주세요.',
+                        type: 'error'
+                    }, '*');
+                }
+            });
+            
+            // 검색 입력창 엔터 처리
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    searchButton.click();
+                }
+            });
+            
+            // 명령어 입력 처리
+            commandInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    processCommand(this.value);
+                    this.value = '';
+                }
+            });
+            
+            // 필터 설정
+            function setupFilters() {
+                const filterBadges = document.querySelectorAll('.badge[data-filter]');
+                
+                filterBadges.forEach(badge => {
+                    badge.addEventListener('click', function() {
+                        const filterType = this.getAttribute('data-filter');
+                        const filterValue = this.getAttribute('data-value');
+                        
+                        // 같은 필터 그룹에서 선택된 뱃지 변경
+                        document.querySelectorAll(`.badge[data-filter="${filterType}"]`).forEach(b => {
+                            b.classList.remove('selected');
+                        });
+                        
+                        this.classList.add('selected');
+                        
+                        // 필터 적용
+                        applyFilters();
+                    });
+                });
+            }
+            
+            // 필터 적용
+            function applyFilters() {
+                const locationFilter = document.querySelector('.badge.selected[data-filter="location"]').getAttribute('data-value');
+                const featureFilter = document.querySelector('.badge.selected[data-filter="feature"]').getAttribute('data-value');
+                const sortFilter = document.querySelector('.badge.selected[data-filter="sort"]').getAttribute('data-value');
+                
+                const allCafes = document.querySelectorAll('.cafe-item');
+                
+                allCafes.forEach(cafe => {
+                    const cafeLocation = cafe.getAttribute('data-location');
+                    const cafeFeatures = cafe.getAttribute('data-features')?.split(',') || [];
+                    
+                    let visible = true;
+                    
+                    if (locationFilter !== 'all' && cafeLocation !== locationFilter) {
+                        visible = false;
+                    }
+                    
+                    if (featureFilter !== 'all' && !cafeFeatures.includes(featureFilter)) {
+                        visible = false;
+                    }
+                    
+                    cafe.style.display = visible ? 'block' : 'none';
+                });
+                
+                // 정렬 (실제 구현에서는 더 복잡한 정렬 로직 필요)
+                if (sortFilter !== 'popular') {
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: `${sortFilter === 'rating' ? '평점' : '최신'}순으로 정렬됩니다.`,
+                        type: 'info'
+                    }, '*');
+                }
+            }
+            
+            // 카페 항목 클릭 처리
+            function setupCafeClicks() {
+                const cafeItems = document.querySelectorAll('.cafe-item');
+                
+                cafeItems.forEach(cafe => {
+                    cafe.addEventListener('click', function() {
+                        const cafeId = this.getAttribute('data-id');
+                        openCafeDetail(cafeId);
+                    });
+                });
+            }
+            
+            // 카페 상세 정보 열기
+            function openCafeDetail(cafeId) {
+                // 실제 구현에서는 API 호출을 통해 카페 상세 정보를 가져옴
+                // 여기서는 간단한 시뮬레이션만 구현
+                
+                let cafeName, cafeAddress, cafeRating, cafeFeatures, cafeRecommendation, cafePromotion;
+                
+                switch (cafeId) {
+                    case 'cafe1':
+                        cafeName = '스타벅스 강남점';
+                        cafeAddress = '서울 강남구 테헤란로 101';
+                        cafeRating = '4.5';
+                        cafeFeatures = '2층 테이블 자리 넓음, 와이파이 빠름, 소음 적음';
+                        cafeRecommendation = '평일 오후 1시~4시';
+                        cafePromotion = '';
+                        break;
+                        
+                    case 'cafe2':
+                        cafeName = '카페 공명';
+                        cafeAddress = '서울 성동구 뚝섬로 123';
+                        cafeRating = '4.8';
+                        cafeFeatures = '독립된 미팅룸 있음, 조용한 분위기, 디저트 맛있음';
+                        cafeRecommendation = '';
+                        cafePromotion = '커피챗 예약 시 아메리카노 1+1';
+                        break;
+                        
+                    case 'cafe3':
+                        cafeName = '카페 노마드';
+                        cafeAddress = '서울 마포구 양화로 45';
+                        cafeRating = '4.3';
+                        cafeFeatures = '콘센트 많음, 오래 있어도 눈치 안줌, 테라스 자리 있음';
+                        cafeRecommendation = '추천 메뉴: 더치커피, 바닐라 라떼';
+                        cafePromotion = '';
+                        break;
+                        
+                    case 'cafe4':
+                        cafeName = '커피 팩토리 판교점';
+                        cafeAddress = '경기 성남시 분당구 판교역로 42';
+                        cafeRating = '4.4';
+                        cafeFeatures = 'IT 종사자들이 많이 찾는 곳, 주차 2시간 무료, 자리 넓음';
+                        cafeRecommendation = '평일 오전 10시~12시';
+                        cafePromotion = '';
+                        break;
+                        
+                    case 'cafe5':
+                        cafeName = '브루잉 포인트';
+                        cafeAddress = '서울 영등포구 여의대로 120';
+                        cafeRating = '4.6';
+                        cafeFeatures = '금융권 종사자들이 많이 찾는 곳, 개인 작업 공간 분리';
+                        cafeRecommendation = '';
+                        cafePromotion = '신규 오픈: 2025년 2월';
+                        break;
+                        
+                    case 'cafe6':
+                        cafeName = '블루보틀 성수점';
+                        cafeAddress = '서울 성동구 아차산로 70';
+                        cafeRating = '4.2';
+                        cafeFeatures = '인테리어가 멋진 카페, 사진찍기 좋음, 커피 품질 높음';
+                        cafeRecommendation = '추천 메뉴: 콜드브루, 뉴올리언스';
+                        cafePromotion = '';
+                        break;
+                        
+                    default:
+                        cafeName = '카페 정보를 찾을 수 없습니다.';
+                        cafeAddress = '주소 정보 없음';
+                        cafeRating = '0.0';
+                        cafeFeatures = '';
+                        cafeRecommendation = '';
+                        cafePromotion = '';
+                }
+                
+                const cafeDetailContent = `
+                    <div class="cafe-detail">
+                        <div class="cafe-info">
+                            <div class="cafe-thumbnail">카페 이미지</div>
+                            <div class="cafe-content">
+                                <div><span style="font-weight:bold;color:yellow;">${cafeName}</span> <span style="color:#999;">★${cafeRating}</span></div>
+                                <div style="color:#999;margin:5px 0;">${cafeAddress}</div>
+                                ${cafePromotion ? `<div style="color:#ff9900;margin-bottom:5px;">🎁 ${cafePromotion}</div>` : ''}
+                                ${cafeRecommendation ? `<div style="color:#0f0;margin-bottom:5px;">💡 ${cafeRecommendation}</div>` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="cafe-description">
+                            ${cafeFeatures}
+                        </div>
+                        
+                        <div style="border-top:1px dashed #0f0;padding-top:10px;">
+                            <div style="margin-bottom:5px;color:#0f0;">편의 시설</div>
+                            <div class="cafe-features-grid">
+                                <div class="cafe-feature"><span class="feature-icon">✓</span> 와이파이</div>
+                                <div class="cafe-feature"><span class="feature-icon">✓</span> 콘센트</div>
+                                <div class="cafe-feature"><span class="feature-icon">✓</span> 화장실</div>
+                                <div class="cafe-feature"><span class="feature-icon">✓</span> 넓은 테이블</div>
+                                ${cafeId === 'cafe4' ? '<div class="cafe-feature"><span class="feature-icon">✓</span> 주차</div>' : ''}
+                                ${cafeId === 'cafe2' ? '<div class="cafe-feature"><span class="feature-icon">✓</span> 미팅룸</div>' : ''}
+                            </div>
+                        </div>
+                        
+                        <div style="border-top:1px dashed #0f0;padding-top:10px;">
+                            <div style="margin-bottom:5px;color:#0f0;">영업 시간</div>
+                            <div>평일: 08:00 - 22:00</div>
+                            <div>주말: 10:00 - 22:00</div>
+                        </div>
+                        
+                        <div style="border-top:1px dashed #0f0;padding-top:10px;margin-top:10px;">
+                            <div style="margin-bottom:5px;color:#0f0;">리뷰</div>
+                            <div style="color:#999;font-style:italic;">"미팅하기 좋은 카페입니다. 자리도 넓고 소음도 적당해요."</div>
+                            <div style="text-align:right;color:#999;font-size:12px;">- 김개발님</div>
+                        </div>
+                    </div>
+                `;
+                
+                window.parent.postMessage({
+                    action: 'openModal',
+                    title: `${cafeName} 상세 정보`,
+                    content: cafeDetailContent,
+                    buttons: [
+                        {
+                            text: '일정 잡기',
+                            action: function() {
+                                scheduleMeeting(cafeName, cafeAddress);
+                                return false; // 모달 유지
+                            }
+                        },
+                        {
+                            text: '확인'
+                        }
+                    ]
+                }, '*');
+            }
+            
+            // 카페 검색
+            function searchCafes(keyword) {
+                window.parent.postMessage({
+                    action: 'notification',
+                    text: `"${keyword}" 키워드로 검색 중...`,
+                    type: 'info'
+                }, '*');
+                
+                // 실제 구현에서는 API 호출을 통해 검색 결과를 가져옴
+                // 여기서는 간단한 시뮬레이션만 구현
+                
+                // 검색어에 따른 결과 필터링
+                const allCafes = document.querySelectorAll('.cafe-item');
+                let matchCount = 0;
+                
+                allCafes.forEach(cafe => {
+                    const name = cafe.querySelector('.cafe-name').textContent.toLowerCase();
+                    const address = cafe.querySelector('.cafe-address').textContent.toLowerCase();
+                    const features = cafe.querySelector('.cafe-features').textContent.toLowerCase();
+                    
+                    if (name.includes(keyword.toLowerCase()) || 
+                        address.includes(keyword.toLowerCase()) ||
+                        features.includes(keyword.toLowerCase())) {
+                        cafe.style.display = 'block';
+                        matchCount++;
+                    } else {
+                        cafe.style.display = 'none';
+                    }
+                });
+                
+                // 검색 결과 알림
+                setTimeout(() => {
+                    if (matchCount > 0) {
+                        window.parent.postMessage({
+                            action: 'notification',
+                            text: `"${keyword}" 검색 결과: ${matchCount}개의 카페를 찾았습니다.`,
+                            type: 'success'
+                        }, '*');
+                    } else {
+                        window.parent.postMessage({
+                            action: 'notification',
+                            text: `"${keyword}" 검색 결과가 없습니다.`,
+                            type: 'error'
+                        }, '*');
+                    }
+                }, 500);
+            }
+            
+            // 미팅 일정 잡기
+            function scheduleMeeting(cafeName, cafeAddress) {
+                const dateTimeContent = `
+                    <div class="form-group">
+                        <label class="form-label">일정 제목</label>
+                        <input type="text" class="form-input" id="scheduleTitle" value="커피챗 미팅">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">미팅 상대</label>
+                        <select class="form-select" id="schedulePartner">
+                            <option value="김개발">김개발 (프론트엔드 개발자)</option>
+                            <option value="박디자이너">박디자이너 (UX/UI 디자이너)</option>
+                            <option value="이창업">이창업 (스타트업 대표)</option>
+                            <option value="최마케터">최마케터 (디지털 마케터)</option>
+                            <option value="정UX">정UX (UX 리서처)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">날짜</label>
+                        <input type="date" class="form-input" id="scheduleDate" min="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">시간</label>
+                        <input type="time" class="form-input" id="scheduleTime">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">장소</label>
+                        <input type="text" class="form-input" id="scheduleLocation" value="${cafeName}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">주소</label>
+                        <input type="text" class="form-input" id="scheduleAddress" value="${cafeAddress}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">메모</label>
+                        <textarea class="form-textarea" id="scheduleMemo" placeholder="미팅 주제나 준비물 등을 메모하세요."></textarea>
+                    </div>
+                `;
+                
+                window.parent.postMessage({
+                    action: 'openModal',
+                    title: '커피챗 일정 잡기',
+                    content: dateTimeContent,
+                    buttons: [
+                        {
+                            text: '저장',
+                            action: function() {
+                                const title = document.getElementById('scheduleTitle').value.trim();
+                                const partner = document.getElementById('schedulePartner').value;
+                                const date = document.getElementById('scheduleDate').value;
+                                const time = document.getElementById('scheduleTime').value;
+                                
+                                if (!title) {
+                                    alert('일정 제목을 입력해주세요.');
+                                    return false;
+                                }
+                                
+                                if (!date) {
+                                    alert('날짜를 선택해주세요.');
+                                    return false;
+                                }
+                                
+                                if (!time) {
+                                    alert('시간을 선택해주세요.');
+                                    return false;
+                                }
+                                
+                                window.parent.postMessage({
+                                    action: 'notification',
+                                    text: `${partner}님과의 커피챗 일정이 ${date} ${time}에 저장되었습니다.`,
+                                    type: 'success'
+                                }, '*');
+                                
+                                // 경험치 획득
+                                window.parent.postMessage({
+                                    action: 'updateUser',
+                                    userData: {
+                                        exp: 20,
+                                        points: 10
+                                    }
+                                }, '*');
+                            }
+                        },
+                        {
+                            text: '취소',
+                            type: 'cancel'
+                        }
+                    ]
+                }, '*');
+            }
+            
+            // 명령어 처리
+            function processCommand(command) {
+                if (!command.trim()) return;
+                
+                const commandLower = command.toLowerCase().trim();
+                
+                if (commandLower.startsWith('검색 ') || commandLower.startsWith('search ')) {
+                    const keyword = commandLower.split(' ').slice(1).join(' ');
+                    searchInput.value = keyword;
+                    searchCafes(keyword);
+                } else if (commandLower.startsWith('일정 ') || commandLower.startsWith('schedule ')) {
+                    const parts = commandLower.split(' ');
+                    if (parts.length < 2) {
+                        window.parent.postMessage({
+                            action: 'notification',
+                            text: `명령어 형식이 잘못되었습니다. '일정 [카페ID]' 형식으로 입력해주세요.`,
+                            type: 'error'
+                        }, '*');
+                        return;
+                    }
+                    
+                    const cafeId = parts[1];
+                    const cafe = document.querySelector(`.cafe-item[data-id="${cafeId}"]`);
+                    if (cafe) {
+                        const cafeName = cafe.querySelector('.cafe-name').textContent.split(' ')[0];
+                        const cafeAddress = cafe.querySelector('.cafe-address').textContent;
+                        scheduleMeeting(cafeName, cafeAddress);
+                    } else {
+                        window.parent.postMessage({
+                            action: 'notification',
+                            text: `카페 ID "${cafeId}"를 찾을 수 없습니다.`,
+                            type: 'error'
+                        }, '*');
+                    }
+                } else if (commandLower.startsWith('상세 ') || commandLower.startsWith('detail ')) {
+                    const cafeId = commandLower.split(' ')[1];
+                    openCafeDetail(cafeId);
+                } else if (commandLower === 'help' || commandLower === '도움말') {
+                    showHelp();
+                } else {
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: `'${command}' 명령어를 찾을 수 없습니다. 'help'를 입력하여 도움말을 확인하세요.`,
+                        type: 'error'
+                    }, '*');
+                }
+            }
+            
+            // 도움말 표시
+            function showHelp() {
+                const helpContent = `
+                    <div class="message">- <span style="color: yellow;">검색 [키워드]</span>: 카페 검색</div>
+                    <div class="message">- <span style="color: yellow;">일정 [카페ID]</span>: 해당 카페에서 일정 잡기 (예: 일정 cafe1)</div>
+                    <div class="message">- <span style="color: yellow;">상세 [카페ID]</span>: 카페 상세 정보 보기 (예: 상세 cafe2)</div>
+                    <div class="message">- <span style="color: yellow;">도움말</span>: 이 도움말 표시</div>
+                `;
+                
+                window.parent.postMessage({
+                    action: 'openModal',
+                    title: '카페 정보 명령어 도움말',
+                    content: helpContent,
+                    buttons: [
+                        {
+                            text: '확인'
+                        }
+                    ]
+                }, '*');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅 - 커피CMD</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/terminal.css">
+    <style>
+        /* 채팅 페이지 전용 스타일 */
+        .chat-container {
+            height: calc(100% - 90px);
+            display: flex;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .chat-list {
+            width: 220px;
+            border-right: 1px solid #0f0;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .chat-preview {
+            padding: 8px;
+            margin-bottom: 5px;
+            border: 1px solid #333;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        .chat-preview:hover, .chat-preview.active {
+            background-color: #031;
+            border-color: #0f0;
+        }
+        
+        .chat-preview-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+        
+        .chat-preview-name {
+            color: yellow;
+            font-weight: bold;
+        }
+        
+        .chat-preview-time {
+            color: #999;
+            font-size: 11px;
+        }
+        
+        .chat-preview-message {
+            color: #ccc;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .chat-preview-notification {
+            background-color: #0f0;
+            color: #000;
+            border-radius: 50%;
+            padding: 0 6px;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+        
+        .chat-content {
+            flex: 1;
+            padding-left: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #555;
+        }
+        
+        .chat-empty-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .emoticon-panel {
+            border: 1px solid #0f0;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .emoticon-item {
+            text-align: center;
+            padding: 5px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        .emoticon-item:hover {
+            background-color: #031;
+        }
+        
+        .chat-message {
+            padding: 5px 10px;
+            margin-bottom: 8px;
+            max-width: 80%;
+            border-radius: 5px;
+            position: relative;
+        }
+        
+        .chat-message-sent {
+            align-self: flex-end;
+            background-color: #063;
+            color: #fff;
+        }
+        
+        .chat-message-received {
+            align-self: flex-start;
+            background-color: #333;
+            color: #fff;
+        }
+        
+        .chat-message-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 2px;
+            text-align: right;
+        }
+        
+        .chat-date-divider {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin: 10px 0;
+            position: relative;
+        }
+        
+        .chat-date-divider::before,
+        .chat-date-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background-color: #333;
+        }
+        
+        .chat-date-divider::before {
+            left: 0;
+        }
+        
+        .chat-date-divider::after {
+            right: 0;
+        }
+        
+        .chat-info-message {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin: 10px 0;
+            font-style: italic;
+        }
+        
+        .chat-tools-panel {
+            display: flex;
+            justify-content: flex-end;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-screen">
+        <div class="message system-message">채팅 화면입니다. 왼쪽의 채팅 목록에서 대화 상대를 선택하세요.</div>
+        
+        <div class="chat-container">
+            <div class="chat-list" id="chatList">
+                <div class="chat-preview active" data-id="user2">
+                    <div class="chat-preview-header">
+                        <span class="chat-preview-name">김개발</span>
+                        <span class="chat-preview-time">1시간 전</span>
+                    </div>
+                    <div class="chat-preview-message">강남역 근처에서 커피 한잔 하면서 더 자세히 여쭤보고 싶네요 ㅎㅎ</div>
+                </div>
+                
+                <div class="chat-preview" data-id="user1">
+                    <div class="chat-preview-header">
+                        <span class="chat-preview-name">박디자이너</span>
+                        <span class="chat-preview-time">3시간 전</span>
+                    </div>
+                    <div class="chat-preview-message">포트폴리오 작업에 대해 조언 부탁드려요!</div>
+                    <span class="chat-preview-notification">2</span>
+                </div>
+                
+                <div class="chat-preview" data-id="user4">
+                    <div class="chat-preview-header">
+                        <span class="chat-preview-name">최마케터</span>
+                        <span class="chat-preview-time">어제</span>
+                    </div>
+                    <div class="chat-preview-message">SNS 광고 전략에 대해 이야기 나눠봐요</div>
+                </div>
+                
+                <div class="chat-preview" data-id="user5">
+                    <div class="chat-preview-header">
+                        <span class="chat-preview-name">정UX</span>
+                        <span class="chat-preview-time">2일 전</span>
+                    </div>
+                    <div class="chat-preview-message">다음 주 화요일 일정 확인 부탁드려요</div>
+                </div>
+                
+                <div class="chat-preview" data-id="user6">
+                    <div class="chat-preview-header">
+                        <span class="chat-preview-name">박풀스택</span>
+                        <span class="chat-preview-time">1주일 전</span>
+                    </div>
+                    <div class="chat-preview-message">지난번 미팅 감사했습니다! 다음에 또 만나요</div>
+                </div>
+            </div>
+            
+            <div class="chat-content" id="chatContent">
+                <div class="chat-header">
+                    <div class="chat-user-info">
+                        <div class="chat-avatar">김</div>
+                        <div>
+                            <div class="chat-name">김개발</div>
+                            <div class="chat-status">프론트엔드 개발자</div>
+                        </div>
+                    </div>
+                    <div class="chat-tools">
+                        <button class="chat-tool-button" id="scheduleBtn">일정 잡기</button>
+                        <button class="chat-tool-button" id="profileBtn">프로필 보기</button>
+                    </div>
+                </div>
+                
+                <div class="chat-tools-panel">
+                    <button class="chat-tool-button" id="refreshBtn">새로고침</button>
+                    <button class="chat-tool-button" id="saveBtn">대화 저장</button>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-date-divider">2025년 2월 28일</div>
+                    
+                    <div class="chat-message chat-message-received">
+                        <div class="chat-message-content">안녕하세요! 프로필 보고 연락드립니다. 프론트엔드 개발 관련해서 이야기 나눠보고 싶어요~</div>
+                        <div class="chat-message-time">오전 10:15</div>
+                    </div>
+                    
+                    <div class="chat-message chat-message-sent">
+                        <div class="chat-message-content">안녕하세요! 반갑습니다. 프론트엔드 개발 어떤 부분에 관심이 있으신가요?</div>
+                        <div class="chat-message-time">오전 10:22</div>
+                    </div>
+                    
+                    <div class="chat-message chat-message-received">
+                        <div class="chat-message-content">요즘 React 18에서 Suspense 활용이나 서버 컴포넌트 관련해서 고민이 많아서요. 혹시 이 부분 경험이 있으신지요?</div>
+                        <div class="chat-message-time">오전 10:30</div>
+                    </div>
+                    
+                    <div class="chat-message chat-message-sent">
+                        <div class="chat-message-content">네, 서버 컴포넌트는 최근 프로젝트에서 도입해봤어요. 생각보다 초기 설정이 까다로웠지만 데이터 패칭 패턴이 많이 깔끔해졌어요.</div>
+                        <div class="chat-message-time">오전 10:35</div>
+                    </div>
+                    
+                    <div class="chat-message chat-message-received">
+                        <div class="chat-message-content">오 그렇군요! 혹시 다음 주 화요일 오후에 시간 되시나요? 강남역 근처에서 커피 한잔 하면서 더 자세히 여쭤보고 싶네요 ㅎㅎ</div>
+                        <div class="chat-message-time">오전 11:05</div>
+                    </div>
+                </div>
+                
+                <div id="emoticonPanel" class="emoticon-panel hidden">
+                    <div class="emoticon-item">ㅋㅋㅋ</div>
+                    <div class="emoticon-item">ㅎㅎㅎ</div>
+                    <div class="emoticon-item">ㅠㅠ</div>
+                    <div class="emoticon-item">^^</div>
+                    <div class="emoticon-item">^_^</div>
+                    <div class="emoticon-item">:)</div>
+                    <div class="emoticon-item">:D</div>
+                    <div class="emoticon-item">ㄷㄷ</div>
+                    <div class="emoticon-item">♡</div>
+                    <div class="emoticon-item">★</div>
+                    <div class="emoticon-item">( •̀ ω •́ )✧</div>
+                    <div class="emoticon-item">(￣▽￣)V</div>
+                    <div class="emoticon-item">(╯°□°）╯︵ ┻━┻</div>
+                    <div class="emoticon-item">┬─┬ノ( º _ ºノ)</div>
+                    <div class="emoticon-item">¯\_(ツ)_/¯</div>
+                </div>
+                
+                <div class="input-line">
+                    <span class="prompt">메시지></span>
+                    <input type="text" class="command-input" id="messageInput" placeholder="메시지를 입력하세요...">
+                    <button class="command-button" id="emoticonBtn">이모티콘</button>
+                    <button class="command-button" id="sendBtn">전송</button>
+                </div>
+            </div>
+            
+            <!-- 채팅 비어있을 때 표시할 화면 -->
+            <div class="chat-empty hidden" id="chatEmpty">
+                <div class="chat-empty-icon">[._.]</div>
+                <div class="chat-empty-text">왼쪽에서 대화할 사용자를 선택하세요</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatList = document.getElementById('chatList');
+            const chatContent = document.getElementById('chatContent');
+            const chatEmpty = document.getElementById('chatEmpty');
+            const chatMessages = document.getElementById('chatMessages');
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const emoticonBtn = document.getElementById('emoticonBtn');
+            const emoticonPanel = document.getElementById('emoticonPanel');
+            const scheduleBtn = document.getElementById('scheduleBtn');
+            const profileBtn = document.getElementById('profileBtn');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            
+            // 현재 선택된 채팅 ID
+            let currentChatId = 'user2';
+            
+            // Mock 데이터
+            const users = {
+                'user1': { name: '박디자이너', job: 'UX/UI 디자이너', lastSeen: '방금 전', unread: 2 },
+                'user2': { name: '김개발', job: '프론트엔드 개발자', lastSeen: '1시간 전', unread: 0 },
+                'user4': { name: '최마케터', job: '디지털 마케터', lastSeen: '어제', unread: 0 },
+                'user5': { name: '정UX', job: 'UX 리서처', lastSeen: '2일 전', unread: 0 },
+                'user6': { name: '박풀스택', job: '풀스택 개발자', lastSeen: '1주일 전', unread: 0 }
+            };
+            
+            // 세션 스토리지에서 현재 채팅 사용자 가져오기
+            const storedUser = sessionStorage.getItem('currentChatUser');
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                currentChatId = userData.id;
+                
+                // 채팅 목록에서 해당 사용자 활성화
+                const chatItems = document.querySelectorAll('.chat-preview');
+                chatItems.forEach(item => item.classList.remove('active'));
+                
+                const targetChat = document.querySelector(`.chat-preview[data-id="${currentChatId}"]`);
+                if (targetChat) {
+                    targetChat.classList.add('active');
+                }
+                
+                // 세션 스토리지 클리어
+                sessionStorage.removeItem('currentChatUser');
+            }
+            
+            // 채팅 목록 클릭 처리
+            setupChatListClicks();
+            
+            // 메시지 전송 처리
+            setupMessageSending();
+            
+            // 이모티콘 패널 처리
+            setupEmoticonPanel();
+            
+            // 버튼 이벤트 처리
+            setupButtonActions();
+            
+            // 채팅 목록 클릭 처리
+            function setupChatListClicks() {
+                const chatItems = document.querySelectorAll('.chat-preview');
+                
+                chatItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        // 활성 채팅 변경
+                        chatItems.forEach(chat => chat.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        // 현재 채팅 ID 업데이트
+                        currentChatId = this.getAttribute('data-id');
+                        
+                        // 채팅 내용 불러오기
+                        loadChatContent(currentChatId);
+                        
+                        // 알림 제거
+                        const notification = this.querySelector('.chat-preview-notification');
+                        if (notification) {
+                            notification.remove();
+                        }
+                    });
+                });
+            }
+            
+            // 채팅 내용 불러오기
+            function loadChatContent(userId) {
+                if (!users[userId]) {
+                    showChatEmpty();
+                    return;
+                }
+                
+                // 채팅 UI 표시
+                chatContent.classList.remove('hidden');
+                chatEmpty.classList.add('hidden');
+                
+                // 헤더 업데이트
+                const user = users[userId];
+                document.querySelector('.chat-avatar').textContent = user.name.charAt(0);
+                document.querySelector('.chat-name').textContent = user.name;
+                document.querySelector('.chat-status').textContent = user.job;
+                
+                // 추가 채팅 메시지 로딩 (실제 구현에서는 API 호출)
+                // 여기서는 간단히 시뮬레이션만 구현
+                
+                // 스크롤 맨 아래로
+                scrollToBottom();
+            }
+            
+            // 빈 채팅 표시
+            function showChatEmpty() {
+                chatContent.classList.add('hidden');
+                chatEmpty.classList.remove('hidden');
+            }
+            
+            // 메시지 전송 처리
+            function setupMessageSending() {
+                messageInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+                
+                sendBtn.addEventListener('click', sendMessage);
+            }
+            
+            // 메시지 전송
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (!message) return;
+                
+                // 새 메시지 요소 생성
+                const messageElement = document.createElement('div');
+                messageElement.className = 'chat-message chat-message-sent';
+                
+                const contentElement = document.createElement('div');
+                contentElement.className = 'chat-message-content';
+                contentElement.textContent = message;
+                
+                const timeElement = document.createElement('div');
+                timeElement.className = 'chat-message-time';
+                
+                // 현재 시간 포맷팅 (오전/오후 HH:MM)
+                const now = new Date();
+                const ampm = now.getHours() < 12 ? '오전' : '오후';
+                const hours = now.getHours() % 12 || 12;
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                timeElement.textContent = `${ampm} ${hours}:${minutes}`;
+                
+                messageElement.appendChild(contentElement);
+                messageElement.appendChild(timeElement);
+                
+                // 채팅 창에 추가
+                chatMessages.appendChild(messageElement);
+                
+                // 입력창 초기화
+                messageInput.value = '';
+                
+                // 스크롤 맨 아래로
+                scrollToBottom();
+                
+                // 자동 응답 (실제 구현에서는 서버에서 처리)
+                setTimeout(() => {
+                    // 간단한 응답 시뮬레이션
+                    const responses = [
+                        "네, 알겠습니다!",
+                        "좋은 의견이네요. 더 자세히 말씀해 주실 수 있을까요?",
+                        "흥미로운 주제예요. 다음 미팅에서 더 논의해봐요!",
+                        "그렇군요. 이 부분은 제가 더 고민해봐야겠네요.",
+                        "좋은 정보 감사합니다! 참고할게요.",
+                        "당연하죠! 도움이 필요하시면 언제든 말씀해주세요.",
+                        "그 부분에 대해서는 제가 경험이 많지 않아요. 혹시 추천해주실 만한 자료가 있을까요?",
+                        "다음 주에 만나서 더 이야기해보면 좋겠네요!",
+                        "확실히 이해했습니다. 검토 후 다시 연락드릴게요.",
+                        "네, 가능합니다! 일정 잡아볼까요?"
+                    ];
+                    
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    
+                    const responseElement = document.createElement('div');
+                    responseElement.className = 'chat-message chat-message-received';
+                    
+                    const responseContent = document.createElement('div');
+                    responseContent.className = 'chat-message-content';
+                    responseContent.textContent = randomResponse;
+                    
+                    const responseTime = document.createElement('div');
+                    responseTime.responseTime.className = 'chat-message-time';
+                    
+                    // 약간 지연된 시간 (1~2분 후)
+                    const responseDate = new Date(now.getTime() + Math.floor(Math.random() * 120000));
+                    const responseAmPm = responseDate.getHours() < 12 ? '오전' : '오후';
+                    const responseHours = responseDate.getHours() % 12 || 12;
+                    const responseMinutes = responseDate.getMinutes().toString().padStart(2, '0');
+                    responseTime.textContent = `${responseAmPm} ${responseHours}:${responseMinutes}`;
+                    
+                    responseElement.appendChild(responseContent);
+                    responseElement.appendChild(responseTime);
+                    
+                    chatMessages.appendChild(responseElement);
+                    
+                    // 스크롤 맨 아래로
+                    scrollToBottom();
+                    
+                    // 채팅 목록 업데이트
+                    updateChatPreview(currentChatId, randomResponse);
+                    
+                }, Math.random() * 2000 + 1000); // 1-3초 사이 랜덤 지연
+            }
+            
+            // 채팅 스크롤 맨 아래로
+            function scrollToBottom() {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // 채팅 미리보기 업데이트
+            function updateChatPreview(userId, lastMessage) {
+                const chatPreview = document.querySelector(`.chat-preview[data-id="${userId}"]`);
+                if (chatPreview) {
+                    // 메시지 내용 업데이트
+                    const messagePreview = chatPreview.querySelector('.chat-preview-message');
+                    messagePreview.textContent = lastMessage;
+                    
+                    // 시간 업데이트
+                    const timePreview = chatPreview.querySelector('.chat-preview-time');
+                    timePreview.textContent = '방금 전';
+                    
+                    // 맨 위로 이동 (최신 대화 순)
+                    const chatListContainer = document.getElementById('chatList');
+                    chatListContainer.insertBefore(chatPreview, chatListContainer.firstChild);
+                }
+            }
+            
+            // 이모티콘 패널 설정
+            function setupEmoticonPanel() {
+                emoticonBtn.addEventListener('click', function() {
+                    emoticonPanel.classList.toggle('hidden');
+                });
+                
+                // 이모티콘 선택 처리
+                const emoticons = document.querySelectorAll('.emoticon-item');
+                emoticons.forEach(emoticon => {
+                    emoticon.addEventListener('click', function() {
+                        messageInput.value += this.textContent;
+                        messageInput.focus();
+                        emoticonPanel.classList.add('hidden');
+                    });
+                });
+                
+                // 패널 외부 클릭 시 닫기
+                document.addEventListener('click', function(e) {
+                    if (!emoticonPanel.contains(e.target) && e.target !== emoticonBtn) {
+                        emoticonPanel.classList.add('hidden');
+                    }
+                });
+            }
+            
+            // 버튼 이벤트 설정
+            function setupButtonActions() {
+                // 일정 잡기 버튼
+                scheduleBtn.addEventListener('click', function() {
+                    const user = users[currentChatId];
+                    
+                    const scheduleContent = `
+                        <div class="form-group">
+                            <label class="form-label">날짜</label>
+                            <input type="date" class="form-input" id="scheduleDate" min="${new Date().toISOString().split('T')[0]}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">시간</label>
+                            <input type="time" class="form-input" id="scheduleTime">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">장소</label>
+                            <select class="form-select" id="scheduleLocation">
+                                <option value="스타벅스 강남점">스타벅스 강남점</option>
+                                <option value="카페 공명">카페 공명</option>
+                                <option value="카페 노마드">카페 노마드</option>
+                                <option value="블루보틀 성수점">블루보틀 성수점</option>
+                                <option value="직접 입력">직접 입력</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="customLocationGroup" style="display: none;">
+                            <label class="form-label">직접 입력</label>
+                            <input type="text" class="form-input" id="customLocation">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">메모</label>
+                            <textarea class="form-textarea" id="scheduleMemo" placeholder="메모 사항을 입력하세요."></textarea>
+                        </div>
+                    `;
+                    
+                    window.parent.postMessage({
+                        action: 'openModal',
+                        title: `${user.name}님과 일정 잡기`,
+                        content: scheduleContent,
+                        buttons: [
+                            {
+                                text: '전송',
+                                action: function() {
+                                    const date = document.getElementById('scheduleDate').value;
+                                    const time = document.getElementById('scheduleTime').value;
+                                    
+                                    if (!date || !time) {
+                                        alert('날짜와 시간을 모두 입력해주세요.');
+                                        return false;
+                                    }
+                                    
+                                    const locationSelect = document.getElementById('scheduleLocation');
+                                    let location = locationSelect.value;
+                                    
+                                    if (location === '직접 입력') {
+                                        location = document.getElementById('customLocation').value;
+                                        if (!location) {
+                                            alert('장소를 입력해주세요.');
+                                            return false;
+                                        }
+                                    }
+                                    
+                                    const memo = document.getElementById('scheduleMemo').value;
+                                    
+                                    // 일정 메시지 전송
+                                    sendScheduleMessage(date, time, location, memo);
+                                    
+                                    // 경험치 획득
+                                    window.parent.postMessage({
+                                        action: 'updateUser',
+                                        userData: {
+                                            exp: 30,
+                                            points: 10
+                                        }
+                                    }, '*');
+                                    
+                                    window.parent.postMessage({
+                                        action: 'notification',
+                                        text: `${user.name}님과의 일정이 제안되었습니다.`,
+                                        type: 'success'
+                                    }, '*');
+                                }
+                            },
+                            {
+                                text: '취소',
+                                type: 'cancel'
+                            }
+                        ]
+                    }, '*');
+                    
+                    // 직접 입력 선택 시 추가 필드 표시
+                    setTimeout(() => {
+                        const locationSelect = document.getElementById('scheduleLocation');
+                        const customLocationGroup = document.getElementById('customLocationGroup');
+                        
+                        locationSelect.addEventListener('change', function() {
+                            if (this.value === '직접 입력') {
+                                customLocationGroup.style.display = 'block';
+                            } else {
+                                customLocationGroup.style.display = 'none';
+                            }
+                        });
+                    }, 100);
+                });
+                
+                // 프로필 보기 버튼
+                profileBtn.addEventListener('click', function() {
+                    const user = users[currentChatId];
+                    
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: `${user.name}님의 프로필로 이동합니다.`,
+                        type: 'info'
+                    }, '*');
+                    
+                    // 임시로 프로필 정보 모달 표시
+                    const profileContent = `
+                        <div class="profile-info">
+                            <div class="profile-item">
+                                <div class="profile-label">이름:</div>
+                                <div class="profile-value">${user.name}</div>
+                            </div>
+                            <div class="profile-item">
+                                <div class="profile-label">직업:</div>
+                                <div class="profile-value">${user.job}</div>
+                            </div>
+                            <div class="profile-item">
+                                <div class="profile-label">마지막 접속:</div>
+                                <div class="profile-value">${user.lastSeen}</div>
+                            </div>
+                            <div class="profile-item">
+                                <div class="profile-label">관심 분야:</div>
+                                <div class="profile-value">
+                                    ${currentChatId === 'user1' ? '웹디자인, 사용자경험, 미니멀리즘, 커피' : 
+                                      currentChatId === 'user2' ? 'React, 디자인시스템, 오픈소스, 맥주' : 
+                                      'IT, 커피, 네트워킹, 자기계발'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    window.parent.postMessage({
+                        action: 'openModal',
+                        title: `${user.name}님의 프로필`,
+                        content: profileContent,
+                        buttons: [
+                            {
+                                text: '확인'
+                            }
+                        ]
+                    }, '*');
+                });
+                
+                // 새로고침 버튼
+                refreshBtn.addEventListener('click', function() {
+                    loadChatContent(currentChatId);
+                    
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: '채팅 내용이 새로고침되었습니다.',
+                        type: 'info'
+                    }, '*');
+                });
+                
+                // 대화 저장 버튼
+                saveBtn.addEventListener('click', function() {
+                    window.parent.postMessage({
+                        action: 'notification',
+                        text: '대화 내용이 저장되었습니다.',
+                        type: 'success'
+                    }, '*');
+                });
+            }
+            
+            // 일정 메시지 전송
+            function sendScheduleMessage(date, time, location, memo) {
+                // 새 메시지 요소 생성 (일정 제안)
+                const messageElement = document.createElement('div');
+                messageElement.className = 'chat-message chat-message-sent';
+                
+                const dateObj = new Date(date + 'T' + time);
+                const formattedDate = new Intl.DateTimeFormat('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'long',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true
+                }).format(dateObj);
+                
+                const contentElement = document.createElement('div');
+                contentElement.className = 'chat-message-content';
+                contentElement.innerHTML = `
+                    <div style="border-left: 3px solid #0f0; padding-left: 10px; margin: 5px 0;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">📅 일정 제안</div>
+                        <div>날짜: ${formattedDate}</div>
+                        <div>장소: ${location}</div>
+                        ${memo ? `<div>메모: ${memo}</div>` : ''}
+                    </div>
+                `;
+                
+                const timeElement = document.createElement('div');
+                timeElement.className = 'chat-message-time';
+                
+                // 현재 시간 포맷팅
+                const now = new Date();
+                const ampm = now.getHours() < 12 ? '오전' : '오후';
+                const hours = now.getHours() % 12 || 12;
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                timeElement.textContent = `${ampm} ${hours}:${minutes}`;
+                
+                messageElement.appendChild(contentElement);
+                messageElement.appendChild(timeElement);
+                
+                // 채팅 창에 추가
+                chatMessages.appendChild(messageElement);
+                
+                // 스크롤 맨 아래로
+                scrollToBottom();
+                
+                // 자동 응답 (실제 구현에서는 서버에서 처리)
+                setTimeout(() => {
+                    const responseElement = document.createElement('div');
+                    responseElement.className = 'chat-message chat-message-received';
+                    
+                    const responseContent = document.createElement('div');
+                    responseContent.className = 'chat-message-content';
+                    responseContent.innerHTML = '네, 좋습니다! 해당 일정으로 뵙겠습니다. 👍';
+                    
+                    const responseTime = document.createElement('div');
+                    responseTime.className = 'chat-message-time';
+                    
+                    // 약간 지연된 시간
+                    const responseDate = new Date(now.getTime() + Math.floor(Math.random() * 120000));
+                    const responseAmPm = responseDate.getHours() < 12 ? '오전' : '오후';
+                    const responseHours = responseDate.getHours() % 12 || 12;
+                    const responseMinutes = responseDate.getMinutes().toString().padStart(2, '0');
+                    responseTime.textContent = `${responseAmPm} ${responseHours}:${responseMinutes}`;
+                    
+                    responseElement.appendChild(responseContent);
+                    responseElement.appendChild(responseTime);
+                    
+                    chatMessages.appendChild(responseElement);
+                    
+                    // 스크롤 맨 아래로
+                    scrollToBottom();
+                    
+                    // 채팅 목록 업데이트
+                    updateChatPreview(currentChatId, '네, 좋습니다! 해당 일정으로 뵙겠습니다. 👍');
+                    
+                    // 일정 확정 메시지
+                    const infoElement = document.createElement('div');
+                    infoElement.className = 'chat-info-message';
+                    infoElement.innerHTML = `📌 ${formattedDate}에 ${location}에서 만남이 확정되었습니다.`;
+                    
+                    chatMessages.appendChild(infoElement);
+                    scrollToBottom();
+                    
+                }, Math.random() * 2000 + 1000); // 1-3초 사이 랜덤 지연
+            }
+        });
+    </script>
+</body>
+</html>
