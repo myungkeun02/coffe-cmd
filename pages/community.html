@@ -807,81 +807,53 @@
                 }
             }
             
-            // 글쓰기 폼 열기
             function openWriteForm() {
-                const writeContent = `
-                    <div class="form-group">
-                        <label class="form-label">게시판 선택</label>
-                        <select class="form-select" id="postBoard">
-                            <option value="dev">개발자 게시판</option>
-                            <option value="design">디자인 게시판</option>
-                            <option value="marketing">마케팅 게시판</option>
-                            <option value="startup">스타트업 게시판</option>
-                            <option value="career">커리어 상담</option>
-                            <option value="freelance">프리랜서 게시판</option>
-                            <option value="networking">네트워킹</option>
-                            <option value="qa">Q&A</option>
-                            <option value="free">자유 게시판</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">제목</label>
-                        <input type="text" class="form-input" id="postTitle" placeholder="제목을 입력하세요">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">내용</label>
-                        <textarea class="form-textarea" id="postContent" placeholder="내용을 입력하세요" rows="10"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">태그 (쉼표로 구분)</label>
-                        <input type="text" class="form-input" id="postTags" placeholder="예: React, 프론트엔드, 개발">
-                    </div>
-                `;
-                
-                window.parent.postMessage({
-                    action: 'openModal',
-                    title: '새 글 작성',
-                    content: writeContent,
-                    buttons: [
-                        {
-                            text: '등록',
-                            action: function() {
-                                const title = document.getElementById('postTitle').value.trim();
-                                const content = document.getElementById('postContent').value.trim();
-                                
-                                if (!title) {
-                                    alert('제목을 입력해주세요.');
-                                    return false;
-                                }
-                                
-                                if (!content) {
-                                    alert('내용을 입력해주세요.');
-                                    return false;
-                                }
-                                
-                                window.parent.postMessage({
-                                    action: 'notification',
-                                    text: '게시글이 등록되었습니다.',
-                                    type: 'success'
-                                }, '*');
-                                
-                                // 경험치 획득
-                                window.parent.postMessage({
-                                    action: 'updateUser',
-                                    userData: {
-                                        exp: 30,
-                                        points: 10
-                                    }
-                                }, '*');
-                            }
-                        },
-                        {
-                            text: '취소',
-                            type: 'cancel'
-                        }
-                    ]
-                }, '*');
-            }
+    const writeContent = `
+        <div class="form-group">
+            <label class="form-label">게시판 선택</label>
+            <select class="form-select" id="postBoard">
+                <option value="dev">개발자 게시판</option>
+                <option value="design">디자인 게시판</option>
+                <option value="marketing">마케팅 게시판</option>
+                <option value="startup">스타트업 게시판</option>
+                <option value="career">커리어 상담</option>
+                <option value="freelance">프리랜서 게시판</option>
+                <option value="networking">네트워킹</option>
+                <option value="qa">Q&A</option>
+                <option value="free">자유 게시판</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">제목</label>
+            <input type="text" class="form-input" id="postTitle" placeholder="제목을 입력하세요">
+        </div>
+        <div class="form-group">
+            <label class="form-label">내용</label>
+            <textarea class="form-textarea" id="postContent" placeholder="내용을 입력하세요" rows="5"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">태그 (쉼표로 구분)</label>
+            <input type="text" class="form-input" id="postTags" placeholder="예: React, 프론트엔드, 개발">
+        </div>
+    `;
+
+    window.parent.postMessage({
+        action: 'openModal',
+        title: '새 글 작성',
+        content: writeContent,
+        buttons: [
+            { text: '등록', action: 'submitPost' }, // 직접 함수 전달하지 않음
+            { text: '취소', type: 'cancel' }
+        ]
+    }, '*');
+}
+
+// 부모 창에서 메시지 수신 후 처리 (부모 창의 이벤트 핸들러에서 실행)
+window.addEventListener('message', function(event) {
+    if (event.data.action === 'submitPost') {
+        submitPost();
+    }
+});
             
             // 도움말 표시
             function showHelp() {
@@ -904,6 +876,39 @@
                 }, '*');
             }
         });
+        // 게시글 저장 함수
+function submitPost() {
+    const board = document.getElementById('postBoard').value;
+    const title = document.getElementById('postTitle').value.trim();
+    const content = document.getElementById('postContent').value.trim();
+    const tags = document.getElementById('postTags').value.trim().split(',');
+
+    if (!title || !content) {
+        alert('제목과 내용을 입력해주세요.');
+        return;
+    }
+
+    const newPost = {
+        id: `post${Date.now()}`,
+        board,
+        title,
+        content,
+        tags,
+        author: '익명',
+        date: new Date().toLocaleDateString(),
+        views: 0,
+        comments: 0
+    };
+
+    posts.unshift(newPost);
+    updatePostList();
+
+    window.parent.postMessage({
+        action: 'notification',
+        text: '게시글이 등록되었습니다.',
+        type: 'success'
+    }, '*');
+}
     </script>
 </body>
 </html>
